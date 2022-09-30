@@ -1,0 +1,3 @@
+These two collection files are included for sake of example.  The files to which the paths therein refer are not included in MIMT.  On one hand, I'm not dealing with the hassle of licensing details.  On the other hand, the omitted libraries aren't worth the space they would require anyway.
+
+See the demos included for impatsort/impatmap.

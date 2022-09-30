@@ -1,0 +1,9 @@
+Some of these FEX submissions originally came with supplemental content not needed by MIMT files.
+For the sake of reducing archive size, things like images and test files used for demonstration were removed.
+
+Because mathworks appends nonunique license files to the root level of FEX archives, 
+license files clobber each other in common installation practices.
+This is why all the license files are renamed and put in a directory by themselves.
+
+If you are interested in the complete work of the original developers, 
+all are available on the FEX by a simple search or via links in the MIMT documentation or MIMT FEX page.

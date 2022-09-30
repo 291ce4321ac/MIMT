@@ -1,0 +1,8 @@
+These are retro patterns sourced from and based on legacy software packages.
+Collected and created by Arvin61R58
+
+https://www.deviantart.com/arvin61r58/art/OldSchool-Patterns-392539535
+https://openclipart.org/detail/217545/retro-patterns
+
+The library as posted contains several antialiased images
+These files have been binarized to approximate the original appearance

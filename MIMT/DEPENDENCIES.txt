@@ -1,0 +1,111 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The following files require Image Processing Toolbox to work
+
+COMPLETE IPT DEPENDENCY:
+vectorscan		(uses fspecial) (this usage is preserved for reference)
+
+PARTIAL IPT DEPENDENCY:
+immask 			(geometric selection tools only)
+uwredcomp		(only when using smoothing option (requires R2014a+))
+
+NO IPT DEPENDENCY:
+(everything else)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Many files have had their IPT dependency effectively removed by using tools such as  
+those listed below.  
+
+These tools include conditional fallback implementations which will run in the absence 
+of IPT. Consider them if you want to reduce IPT dependencies in your own releases.
+These are not generally drop-in replacements for all use-cases, and the fallback code 
+may be slower than the IPT passthrough. Take note of any differences in supported 
+functionality or syntax.  
+
+adapthisteqFB	uses/replaces adapthisteq
+bwareafiltFB	uses/replaces bwareafilt
+bwdistFB		uses/replaces bwdist
+bwlabelFB		uses/replaces bwlabel
+despeckle		uses/replaces bwareaopen
+histeqFB		uses/replaces histeq
+hitmiss			uses/replaces bwhitmiss
+imadjustFB		uses/replaces imadjust
+imcast 			uses/replaces im2double, im2uint8, etc
+imappmat		uses/replaces imapplymatrix
+imcropFB		uses/replaces imcrop
+imfilterFB		uses/replaces imfilter
+imhistFB		uses/replaces imhist
+imresizeFB		uses/replaces imresize
+imrotateFB		uses/replaces imrotate
+imhistmatchFB	uses/replaces imhistmatch
+imnoiseFB		uses/replaces imnoise
+imsharpenFB		uses/replaces imsharpen
+morphnhood		uses/replaces bwmorph, bwperim, (bwlookup to some extent)
+morphops		uses/replaces imdilate, imopen, imtophat, etc
+nhfilter		uses/replaces medfilt2, stdfilt, rangefilt, (nlfilter to some extent)
+padarrayFB		uses/replaces padarray
+stretchlimFB	uses/replaces stretchlim
+
+Other tools don't passthrough to their IPT counterparts, but may fill the same role 
+depending on your needs. For example:
+
+edgemap			see imgradient, edge
+replacepixels	see imoverlay
+fkgen			see fspecial
+tonemap			see tonemap
+mono			see rgb2gray, rgb2lightness
+imerror			see immse, psnr
+imcheckerboard	see checkerboard
+splitchans		see imsplit
+iminv			see imcomplement
+colordiff		see deltaE, imcolordiff
+roifilter		see roifilt2
+flattenbg		see imflatfield
+unsharp			see imsharpen
+immodify		see imcontrast
+imcompare		see imfuse, imshowpair
+rgb2linear		see rgb2lin
+linear2rgb		see lin2rgb
+and other color space conversion tools
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Some files may still require other resources:
+
+picdynamics requires LTI simulation tools which may be found in various toolboxes
+gifread/gifwrite requires imagemagick for certain options
+imrectify requires R2013b or newer in order to use the table class (only when using 'showgui',false)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Some files have FEX dependencies:
+These should be included in the zip archive, but just in case:
+
+ifversion() is used by various tools
+https://www.mathworks.com/matlabcentral/fileexchange/69138-ifversion
+
+parts of the GP toolbox are used by bwlabelFB()
+https://www.mathworks.com/matlabcentral/fileexchange/49692-gptoolbox
+
+DT1() is used by bwdistFB()
+https://www.mathworks.com/matlabcentral/fileexchange/31581-generalized-distance-transform
+
+hyphenate() is required by textblock()
+https://www.mathworks.com/matlabcentral/fileexchange/61882-hyphenate
+
+OcTree() is required by colorquant()
+https://www.mathworks.com/matlabcentral/fileexchange/40732-octree-partitioning-3d-points-into-spatial-subvolumes
+
+inpaint_nans() is required by thresholdinpaint()
+http://www.mathworks.com/matlabcentral/fileexchange/4551-inpaint-nans
+
+STFT/ISTFT tools are required by im2spectrogram() and text2spectrogram
+http://www.mathworks.com/matlabcentral/fileexchange/45197-short-time-fourier-transformation--stft--with-matlab-implementation
+
+GUI tools rely on akZoom by Alexander Kessel
+http://www.mathworks.com/matlabcentral/fileexchange/41426-akzoom
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+While not dependent, various MIMT tools have used or have borrowed from various resources
+and prior implementations.  These credits are typically mentioned in the function synopsis
+or in internal comments.
+
+

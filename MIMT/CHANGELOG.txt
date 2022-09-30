@@ -1,0 +1,620 @@
+% this isn't really a proper or readable log, and it doesn't cover everything 
+% this is just an unedited dump of my own haphazard and incomplete temporary notes
+% at least the ones that didn't get deleted already
+% if i never wrote a note to myself about an edit (e.g. updating a dependent file), it's not in here
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.31 update
+
+% FIXED
+% imcompose still has invsqtdiff DONE
+% imblend had no clamp on opacity input! fixed.
+% imadjustFB FB mode fixes issue with complex outputs
+% replacepixels implicit casting usage fixed.
+% contour plot sheet for softlight (and the whole pdf) (copied to package dir as well)
+% added warning to vectorscan synopsis
+% imcartpol wouldn't work on ~R2009b due to lack of atan2d()
+% radgrad error messages were all prefixed as for lingrad
+
+% IMPROVED 
+% added deprecation note to batchloader synopsis
+% added contour plot links to imblend synopsis 
+% updated imblend/imcompose to correspond with krita; updated contour plots & pdf
+% imcompose:
+%	modifier channel specificity support + I/IA/RGBA support
+%	changed handling of hidden baselayer to match gimp behavior
+% mergedown
+% gifwrite delay vectorization
+% gifread frame range option
+% addborder
+% mono minor optimizations + ws modes
+% rgb2lch,rgb2husl synopsis class support notes
+% thresholdinpaint now supports I images
+% added YPbPr to LCH tools
+% cropborder automatic mode +4D support
+
+
+% ADDED
+% chancount (none)
+% icparams (none)
+% imrectrotate (imresize)
+% imannrotate (none)
+% imlnclite (none)
+% extractbg (none)
+% colorquant (needs OcTree from FEX)
+% imrecolor (needs IPT)
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.32 update
+
+% IMPROVED 
+% imblend softlighteb2 parameterization edit, added meanlight, softmeanlight, hardmixib
+% changed hardmixps parameterization, parameterized hardmixkr, some speed improvements
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.33 update
+
+% FIXED
+% fixed imblend, ismono indentation
+% imcompose didn't have meanlight modes, hardmixib, permute modes
+% fixed bug in easylight for amt=2, softmeanlight corner singularity; did complex output-proofing
+% case matching for 'farfg' and 'farbg' were missing from imblend. wtaf
+% fixed imrange to always output 'double', regardless of inclass; prevents issues with integer output causing implicit casting and data loss externally
+%   e.g. [imrange(uint8pict) size(giantpict)] will implicitly cast the vector to match the first image, truncating the results from size()
+% the way output assignments were handled in fourdee was causing an implicit squeeze, resulting in vector outputs being oriented unexpectedly
+% replacepixels had a warning message absentmindedly changed to an error message, causing an undue halt
+% tooltip bug in imshow2 'tools' mode for framenumber edit box
+% better warning suppression for imshow2 cleanliness when docked window is resized
+% imcompose invert checkbox wasn't set if flag was set via command arguments
+
+% IMPROVED 
+% changed 'extremity' & 'negation' parameterization range; saved plot sweeps, need to crop & add to pdf DONE
+% minor speed improvement to near/far in imblend
+% added blue noise dissolve modes to imblend/imcompose
+% added vectorized width support to addborder
+% changed pinlight paramzn
+% added channel selection to cropborder; changed pmzn to use KVP
+% added histeq/ahisteq hue/chroma modes to imlnc
+% added reset button for imtweak/imlnc modes in immodify
+% added near/far fga modes to imblend, though idk if imcompose can handle the forced expansion (can't)
+% added function transformations to imblend, imcompose
+% added multichannel support and sane class handling to colorpict, fixed dependency on old syntax
+% reconfigured addborder to use matchchannels
+% added multiple outargs to fourdee (not idiotproof, but it works)
+% roishift, roiflip now support class inheritance
+% added LUT interpolation to maxchroma
+% adapted rgb2hsy,hsy2rgb,imtweak to use new LUT interpolation via maxchroma
+% added direct calculation modes to rgb2hsy,hsy2rgb to match husl tools
+% added non-blocking mode to immodify, made commitbutton tts conditional
+% 5ms speed boost to softlightsvg
+% added fkgen to PBM,imblend,imcompose,immodify,tonemap,imrecolor,continuize,immask
+% added addborder/cropborder/color2alpha to immodify
+% rewrote imfold for speed, accuracy, and reversibility
+% rewrote shuffle to use imdetile,imtile; updated glasstiles, immodify, demos, manual examples to match syntax
+% added import error dialogs to imcompose,imcompare,immask,imshow2
+% minor speed improvement to ismono
+% added alpha passthrough to mono/tonemap
+% rewrote lineshifter/straightshifter for implicit param/mask expansion, better class handling
+% rewrote meanlines for speed, class/chan flex
+% imcompose added layermod dimension check & error handling
+% added direct color tuple entry methods to support colorpict tool (and others in future) in imgenerate
+% added pwlgamma param to imannrotate, imrectrotate
+% rewrote dilatemargins for class independence, KVP paramzn, extra mode; updated dependencies
+% removed redundant RGB option flag from meanlines; flipped DIM param behavior; preserve alpha; updated deps
+% transitioned roishift/flip to readable keys instead of obtuse flags
+
+% ADDED
+% color2alpha
+% colorpicker
+% continuize
+% edgemap
+% fkgen
+% imdetile
+% imtile
+% imstats
+% isimageclass
+% isopaque
+% issolidcolor
+% lcmap
+% maketileable
+% matchchannels
+% pseudoblurmap
+% imrescale
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.34 update
+
+% FIXED
+% softlighteb2 param sweep plots had mislabeled axes; fixed
+% class support bug in mono for non-FP inputs in trivial modes
+% bug in faxmachine demo in moreexamples (and imdestroyer) due to dilatemargins syntax change
+% various bugs in imdestroyer due to things expecting class-appropriate color tuples, uint8 class
+% blendmodedemos file was full of broken shit and outdated syntax; fixed corresponding docs
+% 'replacecolor','excludecolor' were not listed as RGB modes, but would break without RGB inputs
+
+% IMPROVED 
+% imblend synopsis edits, interpolate fractional iteration support (not updating plot sheet)
+% rewrote randlines for class support, kvp
+% perlin rewrote for better flexibility, scale-invariance, clarity, class support
+% added simnorm usage to imcartpol,imrectrotate,noisedither
+% imblend added replace/preserve modes, updated pdf
+% imblend made interpolate mode support fractional iterations
+% imblend changed lighten/darken rgb modes to use pnorm ease; changed paramzn; updated pdf; no deps found
+% imblend added flatdodge/burn; updated plots+table
+% imblend speed improvement to SD2 SD3, easyL/D/B gammaD/B for default amount
+
+% ADDED (CHECK DEPENDENCIES!)
+% simnorm
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.34.1 update
+
+% IMPROVED
+% imblend made flatdodge/burn parametric; updated plots, table, pdf
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.35 update
+
+% FIXED
+% nested function variable scope strictness improvement in R2019 revealed bugs, may be others
+%   imrectrotate, imcompose
+% lighten/darkeny param change bugfix
+% imblend bug in special modes which allowed invalid modenames to produce an error before falling to the end of sw-case structure
+% improper generalization bug using ones() prevented operation with logical class spec; same issue exists with zeros()
+%   addborder, imtile, matchchannels, colorpict, eoline, imcartpol, imdetile, imtile, imstacker, issolidcolor, mono, roishift/flip, shuffle
+% bug in matchchannels due to scalar/array multiplication not being implicitly elementwise for logical data like it is for numeric data 
+% meanlines orientation menu in immodify was flipped (consequence of syntax change in meanlines)
+% bug in gifread for framerange was mis-associating map/frame indices for certain cases
+% bug in gifread was forcing framerange to [] for imagemagick case, producing an error for 'allframes' case
+% imtile padcolor tested for numeric class, but not logical.  perfect case for isimageclass()
+
+% IMPROVED 
+% imblend changed flatdodge/burn, colordodge/burn paramzn
+% imblend added meandodge/burn, polydodge/burn
+% imblend improved overlay/hardlight/interpolate LUT interpolators for accuracy
+% added index to plot/properties pdf, redid some old sweeps
+% roishift/flip im/mask correspondence check
+% continuize syntax changed to support arbitrary filters instead of a radius parameter only
+% added image class to image info in imshow2, fixed data range display to correspond strictly to inclass
+% added 4D error msg to colorpicker, immodify; countless others have no enforcement; /me shrugs
+% rewrote imecho for simplicity/classflex/chanflex/KVP and to fix stupid frame ordering bug
+% added minimal functionSignatures.json for gifread filename completion only (R2016+)
+% minor sqrt() vs ^0.5 swap in imcompare (speed improvement); didn't find any other file instances via grep
+% added temporary warning note to gifread synopsis regarding post-R2018b imread bug
+
+% ADDED 
+% mlmask
+% imcontmip
+% imcontfdx
+% fdblend
+% imones
+% imzeros
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.36 update
+
+% FIXED
+% bugs in moreexamples.m from imblend/gifread changes
+% discarded redundant data in template4ods (saves ~1MB)
+% imblend origin singularity in hardmixib/kr for certain parameter values
+% added version lockout to vectorscan
+% megedown demo was messed up due to changes in gifread supporting alpha
+% bug in replacepixels for 4D FG with logical masks
+
+% IMPROVED 
+% added srlab2 paper citation to lch tools synopses
+% added breaks to prevent demo scripts from being run straight
+% imblend: added 'moon' and 'star' modes; removed 'compsqrtdiff', just use inbuilt xfrm option
+% imblend: rearranged things for better organization and clarity
+%   hybrid relational modes are not strictly dodges/burns; renamed
+%   soft dodges/burns are not dodges/burns or unidirectional; renamed using 'penumbra', moved
+%   base quadratics are not unidirectional complements, moved
+%   'bright' and 'dark' are not unidirectional; discovered simplification/purpose; renamed and recategorized
+%   'light' and 'shadow' are effectively dodges/burns; renamed and recategorized
+%   re/parameterized 'easydodge/burn', 'sqrtdiff','difference','equivalence'
+%   added mostsat/leastsat relationals
+
+% ADDED (CHECK DEPENDENCIES!)
+% dotmask
+% imsize
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.36.1 update
+
+% FIXED
+% imcompose: bunch of modes were incorrectly listed as non-paramized
+
+% IMPROVED 
+% imblend: minor synopsis edits meanlight, saturate/desaturate
+%   sped up pnorm, superlight with fast cases
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.36.2 update
+
+% FIXED
+% imblend: didn't add most/leastsat to RGB mode check; DONE
+%    gammadodge/burn modes were incorrectly listed as having gradient discontinuity (misclassified by a numeric test)
+%    it's not technically discontinuous, but it approaches the boundary value relatively suddenly before becoming nearly tangential
+%    so the distinction may be questionable in this case.
+
+% IMPROVED 
+% imblend: added suaudodge/burn
+
+% ADDED
+% textim
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.37 update
+
+% FIXED
+% imcompose: amount field had limitation where 3D arrays can't be passed due to str/num conversion
+%     used evalin() to simultaneously deal with ND array presentation and also allow use of WS vars
+
+% IMPROVED 
+% ttspectro: explicitly select 'tti' font to avoid problems if i change the defaults
+% textim: added more fonts
+% imstacker: generalized to support dim1/2 cat functionality
+% imblend: isolated general meshblend() function to help get rid of repeated code and simplify use of mesh presets
+%   added lcd and other mesh mode presets (also to imcompose); these don't get documented
+% changed imcompare singleton implementation to use close instead of raise
+% added 'lost_bomb_recovery.m' script for TF matrix back-calculation
+
+% ADDED 
+% cp437
+% drysize
+% textblock
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.38 update
+
+% FIXED
+% textblock: testmode implementation had broken the height check for explicit geometry spec
+% imcompose: modifier geometry check broke partial frame @layer(chan) spec type and it needed chanfix anyway
+%            also had a dumb copypasted typo that screwed up the compmode menu
+% immodify: fixed longstanding problem provoked when menu cbf gets called before the ui is fully initialized
+% jpegslur: had a stupid bug left over from a prior syntax/dimensionality change in meanlines()
+
+% IMPROVED 
+% imcompose: added verbose layer flag to allow the capture of 'bomb' tf arrays
+% fkgen: integrated roundodd for better readability
+% removed some/all IPT dependency: glasstiles, shuffle, maketileable, imdetile, edgemap, lcdemu, imfold, 
+%   imstacker, imrectrotate, linedither, continuize, im2ods, im2spectrogram, text2spectrogram, tonemap, driftds,
+%   erraccumulate, imcontfdx, imcontmip, imecho, imrecolor, pseudoblurmap, immodify, picdynamics, vectorscan
+%   dilatemargins, immask, imdestroyer, fkgen
+% straightshifter: improved version support (differing syntaxes supported by circshift)
+% various: replaced ismember() with strismember() in some places it might help with speed
+
+% ADDED
+% roundodd
+% roundeven
+% padarrayFB
+% imcropFB
+% imresizeFB
+% imrotateFB
+% imfilterFB
+% morphops
+% strismember
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.39 update
+
+% IMPROVED 
+% morphops: added tophat, bothat
+% immask: removed dependence on bwlabel
+% imcompare: added initial view mode selection keys
+% linedither: somehow didn't have FB tools added
+% imrecolor: removed imhistmatch deps
+% gifread: minimized memory footprint while allocating output array (already uploaded giftools)
+% removed IPT deps from noisedither, imlnc
+% imblend: removed IPT dep warning & error
+
+% ADDED
+% hitmiss
+% morphnhood
+% bwlabelFB
+% despeckle
+% bwdistFB
+% imhistFB
+% histeqFB
+% imhistmatchFB
+% adapthisteqFB
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.40 update
+
+% FIXED
+% for some reason, all the edits to noisedither() weren't saved?? idk wtf happened
+% missed a FB tool adaptation in blendmodedemos.m
+% imcropFB IPT passthrough misandled varargout assignments
+% morphops had a non-FB invocaton of padarray().  why didn't that show up in dependency rpt?
+% bwlabelFB still had a dummy literal for connspec
+
+% IMPROVED 
+% fkgen: added edge detection filters & normalized ED filters for gradient calc
+% addborder: added edge replication/reflection/circular modes
+% edgemap: added new filter modes
+% padarrayFB: FBM now supports arbitrary dimensionality, improved speed
+% removed lcmap, replaced with nhfilter -- removes IPT dependency, is faster, more generalized
+
+% ADDED
+% imerror
+% interleave
+% deinterleave
+% alternate
+% dealternate
+% imcheckerboard
+% freecb
+% nhfilter
+% imnoiseFB
+% imsharpenFB
+% bwareafiltFB
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.41 update
+
+% FIXED
+% immask didn't have bwlabelFB in it?  htf did that get removed? this is the second time that's happened
+% imstats variable scope bug in R2019b
+% mono: old bug had broken colormap handling
+
+% IMPROVED 
+% added use of imappmat() to the following to speed up operations when IPT is available:
+% rgb2hsy, hsy2rgb, rgb2lch, lch2rgb, imrecolor, imblend
+% recalc'd rec601/709 tf mats from spec, consistent precision btw tools
+% morphnhood: added shrink,thin,skel,endpoints,prune; workaround for old bug in bwmorph
+% immask: simplified magic wand segmentation
+% freecb: speed boost (~4x) by avoiding meshgrid; added similar ops for alpha matting:
+%	imcompose, imshow2, immask, immodify, imcompare 
+% imstats: added modefuzzy, moderange; cleaned up some ugliness
+% rgb2lch,lch2rgb: added OKLAB; others optimized for up to 40% reduction in exec time depending on mode
+% imblend: speed improvement by exporting LUTs, using fast rgb-linear tools
+% maxchroma: 8-26% speed boost on LUT methods, calc methods benefit from improvements to lch2rgb
+% added oklab stuff: maxchroma, csview, husl tools, imtweak, immodify, immask, cpicktool
+% replaced verLessThan() with FEX ifversion(): maxchroma, cropborder, imhistFB, imhistmatchFB, imfold
+% added faster flipd() to things: imfold, imcompose, immodify, imcontfdx, roiflip
+% generalized (de)interleave/(de)alternate to support >4D arrays
+% freecb: added fast invert option
+
+% ADDED
+% imappmat
+% rgb2linear
+% linear2rgb
+% flipd
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.42 update
+
+% FIXED
+% edgemap synopsis header didn't list new arguments or default filtertype
+% padarrayFB had IPT passthrough disabled
+% mimread had a path where badframe wasn't set properly to a default
+% padarrayFB-FBmode/addborder had a bug for 'symmetric' and 'circular' for very small images
+% padarrayFB would explode if fed zero padsize for some cases
+% imshow2 had an issue with creating extraneous empty figures when refreshed within a specified axes object
+% nhfilter had assumed stdfilt,rangefilt used filter size params instead of literal filter arrays
+% addborder had bad dim3 expansion due to referencing stale geometry info
+% cropborder ifversion usage was inverted; old path nan masking was vectorizing thisannulus unintentionally
+% imnoiseFB localvar map expansion fails for IPT passthrough
+
+% IMPROVED 
+% maketileable now supports 'revertsize' option; added note to imtile()
+% added MAE and PSNR to imerror()
+% added AGM/GHM to imblend()
+% added tinynum, micronum, etc to textim()
+% improved operator spacing in all files (assignment, relop)
+% added input offset & IPT mode support to imappmat()
+% updated gifread() notice regarding further regression of imread/imfinfo bugs
+% allowed imnoiseFB() to also expand localvar maps on dim1-2
+% changed imfilterFB() default padding to 'replicate'
+
+% ADDED
+% randisum
+% jellyroll
+% imrectify
+% circmean
+% ccmap
+% makect
+% agm
+% ghm
+% splitchans
+% gettfm
+% imgeofilt
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.43 update
+
+% FIXED
+% removed forgotten eval() abuse: imshow2(),immask(),imcompare(),immodify() >:C
+% fixed a bug in immodify that would happen if sliders were slammed in certain absurd cases
+
+% IMPROVED 
+% added 'in' and 'out' to roundodd()/roundeven()
+% gettfm: added BT2020 luma option (non-constant luma only)
+%		  added YCoCg/YCoCg-R modes
+% csview: near-total rewrite to get rid of GUIDE/colorspace()
+%         improved maintainability, added models and features
+%         more robust handling of axes
+
+% ADDED 
+% factor2
+% factor3
+% iminv
+% rgb2hwb
+% hwb2rgb
+% lch2lab
+% lab2lch
+% colordiff
+% siftpixels
+% flattenbg
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.44 update
+
+% FIXED
+% imblend: polar ypp mode got broken by a deg/rad screwup at some point
+% mono: dumb scoping error in dim check (only affected CT inputs iirc)
+
+% IMPROVED 
+% imblend: simplified polar option conversions
+%          split blend/composition blocks into helper files for sake of maintenance; no speed change noticeable
+%          added linear blend/comp options
+% added ctflop for clarity: csview, cpicktool, colorpicker, mono, imtweak, addborder, ccmap, colordiff
+% added imclamp: csview, continuize, cpicktool, imblend
+% minor cleanup in replacepixels
+% added sanity check to countchans()
+
+% ADDED 
+% ctflop
+% imclamp
+% solarize
+% imcurves
+% splitalpha
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.45 update
+
+% IMPROVED 
+% picdynamics: some internal cleanup; decided to not remove CST dependency; still needs work
+% replacepixels: added linear mode
+% added extra modes to mono()
+
+% ADDED 
+% imbcg
+% colorbalance
+% gcolorize
+% mixchannels
+% ghlstool
+% gmrgb2cmyk
+% gmcmyk2rgb
+% tonergb
+% tonecmyk
+% tonepreset
+% unsharp
+% bwfilmemu
+% FXF_collection demo script
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.46 update
+
+% FIXED
+% csview: ycbcr plot range was way too big
+
+% IMPROVED 
+% added 'replicate' to noisedither's use of imfilter (blue)
+% added linrgb/srgb options to lingrad/radgrad
+% gcolorize now supports I/IA/RGBA
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.47 update
+
+% FIXED
+% jellyroll: error messages still said imcinnbun()
+% fixed bug in orddither() coeff matrix generator for extreme k
+% thresholdinpaint had class inheritance broken by dumb copypasta edit
+% csview had some slider labels out of order because the lines where they were sorted were missing/deleted???
+% imshow2() had some usage of dot notation with graphics objects, causing problems in older versions
+
+% IMPROVED 
+% added joinalpha: colorbalance, gcolorize, ghlstool, imbcg, imcurves, mixchannels
+% added alphasafe: imshow2, colorpicker, immodify, imcompose, immask (not imcompare)
+% added truncation option to imtweak() for lch modes
+% added more comments to noisedither, orddither, zfdither
+% mono() didn't handle I/IA inputs gracefully, so added support for that
+% added isimageclass() check to imcast() for more consistent and earlier error handling
+% added mod() to output of circmean() for sake of cleanliness
+% complete rewrite of replacepixels() for more sane handling of transparent inputs
+%   and more consistent and complete expansion behavior, including scalar/tuple masks
+
+% ADDED 
+% uwredcomp
+% gray2rgb
+% joinalpha
+% alphasafe
+% ctpath
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.48 update
+
+% FIXED
+% ctpath didn't render neutral colors correctly in HSL
+% joinalpha usage in imcurves caused problem due to conditional presence of alpha
+% picdynamics had some debugging dumps left in it from the FEX question
+% imcast FB path for FP->int16 had a rounding error
+
+% IMPROVED 
+% added 'glowstar','glowcross' to fkgen(), immodify()
+% thresholdinpaint() had some internal YPP conversions that were replaced with MIMT tools
+% ctpath: tightened up axis ranges for some modes; added 'noline' option
+% rewrote imrescale() to support both implicit and explicit range specification
+% added multiframe support to joinalpha()
+% adjusted color2alpha() to use splitalpha/joinalpha/imclamp
+% imtweak: added support for rectangular operations in LAB, LUV, OKLAB, SRLAB, YPbPr
+%          added support for a full 6-term linear adjustment method in both relative and absolute scale
+%          'ypbpr' mode is now rectangular; prior usage of this option was polar, now accessible as 'ych'
+%          immodify() updated to support ypbpr/ych key changes, but new modes and options aren't included yet
+
+% ADDED 
+% ctshift
+% rbdetile
+% ptile + pattern library
+% impatmap
+% impatsort
+% patbinchart
+% framecount
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.48.1 update
+
+% FIXED
+% cleaned up some forgotten input checks in imtweak
+% padarrayFB had IPT passthrough disabled 
+% missed some instances in immodify() where 'ypbpr'/'ych' transition needed to be enforced
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.49 update
+
+% FIXED
+% imcompose() didn't correctly update list state icons when toggling alpha
+
+% IMPROVED 
+% added extra import functionality to impatsort()
+% changed list state icons in imcompose() for (maybe) better readability
+% removed try/catch from imblend() when calling imcast() for naked error reporting
+
+% ADDED 
+% roifilter
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
