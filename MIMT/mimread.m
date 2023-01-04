@@ -192,6 +192,22 @@ for p = 1:numpicts
 			end
 		end
 		
+	elseif ismember(lower(thisfile(end-3:end)),{'.jpg','jpeg'}) 
+		try
+			[thispict thismap thisalpha] = imreadort(thisfile);
+		catch
+			pictisvalid = 0;
+			if ~strcmp(verbosity,'quiet')
+				fprintf('MIMREAD: %s does not appear to be a valid image\n',imagepaths{p})
+			end
+		end
+		
+		if pictisvalid
+			nvp = nvp+1;
+			nvf = nvf+1;
+			addtobucket();
+		end
+		
 	else
 		try
 			[thispict thismap thisalpha] = imread(thisfile);

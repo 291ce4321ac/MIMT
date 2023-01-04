@@ -63,7 +63,21 @@ switch testortho
 		outpict = inpict;
 		
 	case {1 2 3} % any orthogonal rotation
-		outpict = rot90(inpict,testortho);
+		if ifversion('<','R2014a')
+			s0 = imsize(inpict);
+			if testortho == 2
+				outpict = imzeros(s0,class(inpict));
+			else
+				outpict = imzeros(s0([2 1 3 4]),class(inpict));
+			end
+			for f = 1:s0(4)
+				for c = 1:s0(3)
+					outpict(:,:,c,f) = rot90(inpict(:,:,c,f),testortho);
+				end
+			end
+		else
+			outpict = rot90(inpict,testortho);
+		end
 		
 	otherwise % any non-orthogonal rotation
 		[inpict inclass] = imcast(inpict,'double');

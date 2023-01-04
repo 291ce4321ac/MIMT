@@ -19,7 +19,7 @@ if ~exist('constraint','var')
 	constraint = 'extrema';
 else
 	if ~strismember(constraint,constraintstrings)
-		error('IMNORM: expected CONSTRAINT to be either ''extrema'' or ''mean''');
+		error('SIMNORM: expected CONSTRAINT to be either ''extrema'' or ''mean''');
 	end
 end
 

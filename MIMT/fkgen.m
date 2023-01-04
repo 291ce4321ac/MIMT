@@ -93,7 +93,7 @@ nosizemode = strismember(kstyle,{'prewitt','sobel','scharr','kayyali','roberts',
 	
 if numel(varargin) > 0
 	k = 1;
-	while k <= numel(varargin);
+	while k <= numel(varargin)
 		if k == 1 && isnumeric(varargin{k})
 			blursize = varargin{k};
 			k = k+1;

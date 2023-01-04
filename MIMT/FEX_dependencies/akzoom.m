@@ -205,7 +205,9 @@ end
     if ~coordsWithinLimits(currAx,x,y), return, end
     [x_rel, y_rel] = abs2relCoords(currAx, x, y);
     sc = varargin{2}.VerticalScrollCount;
-    zoomFactor = abs(sc)*(1+wheel_zoomFactor/100)^sign(sc);
+	% EDITED!
+    %zoomFactor = abs(sc)*(1+wheel_zoomFactor/100)^sign(sc);
+	zoomFactor = (abs(sc)*(1+wheel_zoomFactor/100))^sign(sc); 
     if zoomFactor ~= 0 % could happen when fast scrolling 
       for i = affectedAxes(currAx)
         new_xlim_rel = ([0,1] - x_rel) * zoomFactor + x_rel;

@@ -591,7 +591,43 @@
 % roifilter
 
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.50 update
 
+% FIXED
+% xwline gave garbage results for long polylines or if h>w
+% fixed janky zoom behavior of akzoom
+% disabled R2018x axis tb in imshow2 to prevent some control cbf bugginess
+% imerror() psnr calc exploded for integer inputs (native mode)
+% maketileable() was broken for some explicit uses of 'trim' type
+% nhfilter() didn't enforce odd filter width necessary for stdfilt()/rangefilt() passthrough
+% lingrad()/radgrad() nonlinear ease curve functionality was messed up for multipoint cases
+% replacepixels() did not correctly compensate for output alpha when BGA exists
+% tonecmyk()/tonergb() were using IPT rgb2lin() instead of MIMT rgb2linear()
+% color2alpha() tuple/channel matching bug
+% simnorm() inconsequential error message typo
+% imrotateFB() relied on post-R2014a behavior of rot90() for ortho cases; works for earlier versions now
+
+% IMPROVED 
+% added imreadort() to mimread() for .jpg and .jpeg
+% lingrad()/radgrad() take depth spec from colorspec, not size spec; prevents argument & version conflicts
+% added imclassrange() to imrescale()
+% added exos parameter to amedfilt() to process garbage forum screenshots
+% added basic ordfilt() capacity to nhfilter(); also added 'min' and 'max' for no good reason
+% expanded ordfilt mode to support multiple index specification
+% imtweak() now supports k sign for H when using 6-parameter adjustment
+
+% ADDED 
+% imreadort()
+% brline()
+% genknit()
+% matchframes()
+% pickblob()
+% amedfilt()
+% fmedfilt()
+% imclassrange()
+% uint2hex()
+% hex2uint()
 
 
 

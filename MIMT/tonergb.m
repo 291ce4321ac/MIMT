@@ -84,8 +84,8 @@ end % END MAIN SCOPE
 
 function R = luminance(A)
 	% this is the approach used by GMIC
-	A = rgb2lin(A);
-	R = lin2rgb(imappmat(A,[0.22248840 0.71690369 0.06060791]));
+	A = rgb2linear(A);
+	R = linear2rgb(imappmat(A,[0.22248840 0.71690369 0.06060791]));
 end
 
 

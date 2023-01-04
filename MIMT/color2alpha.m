@@ -21,8 +21,8 @@ function outpict = color2alpha(inpict,color)
 
 [inpict inclass] = imcast(inpict,'double');
 
-s = imsize(inpict);
 [inpict inalpha] = splitalpha(inpict);
+s = imsize(inpict);
 cc = s(3);
 numframes = s(4);
 

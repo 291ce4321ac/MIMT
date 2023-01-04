@@ -15,7 +15,7 @@ function ctpath(CT0,varargin)
 %    'noline' omits the lines connecting the markers
 %    'invert' inverts the marker colors for use on an inverted display.
 %
-%  See also: csview, ccmap, makect
+%  See also: csview, ccmap, makect, rgbplot
 
 bigtable = { % create as one big array for sake of compactness, readability, ease of maintenance
 % csnames	plotaxlabel		xyz			plotrange

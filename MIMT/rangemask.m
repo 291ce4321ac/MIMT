@@ -62,7 +62,7 @@ for t = 1:length(channel)
     
     tidyname = lower(thischannel(thischannel ~= ' '));
     
-    for f = 1:numframes;
+    for f = 1:numframes
         thisframe = inpict(:,:,:,f);
         switch tidyname
             case 'r'

@@ -12,6 +12,8 @@
 % Don't try running the whole file straight; it'll just clobber its own output.
 % Pick a section to run, use ctrl-enter or click "Run Section" from the Editor toolbar
 
+return; % prevents the entire file from being run straight-through
+
 %% colorpict demo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 s = [200 300];
@@ -27,8 +29,6 @@ outpict = colorpict(s,c,'uint8');
 
 imshow(outpict)
 %imwrite(outpict,'examples/colorpictex2.jpg','jpeg','Quality',90);
-
-return; % prevents the entire file from being run straight-through
 
 %% cropborder demo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %inpict=imread('sources/probe.jpg');
@@ -2567,6 +2567,16 @@ out = cat(1,A,B);
 imshow2('out','invert','tools')
 %imwrite(out,'examples/nhfilterex1.jpg')
 
+%% 
+% calculate local min/median/max simultaneously
+inpict = imread('sources/peppers.png');
+
+OS = nhfilter(inpict,'ordstat',5,[1 13 25]);
+out = imtile(OS,[3 1]);
+
+imshow2(out,'invert')
+%imwrite(out,'examples/nhfilterex2.jpg')
+
 %% imnoiseFB demo
 
 inpict = imread('sources/colorballs.jpg');
@@ -2955,7 +2965,7 @@ imshow(rgbpict)
 % bigrgb = hsv2rgb(cat(3,hh(:),ss(:),vv(:)));
 % [rr gg bb] = imsplit(bigrgb);
 
-[rr gg bb] = ndgrid(linspace(0,1,15));
+[rr gg bb] = ndgrid(linspace(0,1,256));
 bigrgb = cat(3,rr(:),gg(:),bb(:));
 
 [H W B] = splitchans(rgb2hwb(bigrgb));

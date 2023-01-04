@@ -16,32 +16,34 @@ Many files have had their IPT dependency effectively removed by using tools such
 those listed below.  
 
 These tools include conditional fallback implementations which will run in the absence 
-of IPT. Consider them if you want to reduce IPT dependencies in your own releases.
+of IPT or in versions prior to the introduction of the corresponding IPT tools. 
+Consider them if you want to reduce IPT dependencies in your own releases.
 These are not generally drop-in replacements for all use-cases, and the fallback code 
-may be slower than the IPT passthrough. Take note of any differences in supported 
-functionality or syntax.  
+may be slower than the IPT passthrough. Check the documentation and take note of any 
+differences in supported functionality or syntax.  
 
 adapthisteqFB	uses/replaces adapthisteq
 bwareafiltFB	uses/replaces bwareafilt
 bwdistFB		uses/replaces bwdist
 bwlabelFB		uses/replaces bwlabel
-despeckle		uses/replaces bwareaopen
+despeckle		uses/replaces bwareaopen (default does both opening and closing)
 histeqFB		uses/replaces histeq
 hitmiss			uses/replaces bwhitmiss
 imadjustFB		uses/replaces imadjust
 imcast 			uses/replaces im2double, im2uint8, etc
-imappmat		uses/replaces imapplymatrix
+imappmat		uses/replaces imapplymatrix (default output class handling differs)
 imcropFB		uses/replaces imcrop
-imfilterFB		uses/replaces imfilter
+imfilterFB		uses/replaces imfilter (default edge handling differs)
 imhistFB		uses/replaces imhist
 imresizeFB		uses/replaces imresize
 imrotateFB		uses/replaces imrotate
 imhistmatchFB	uses/replaces imhistmatch
 imnoiseFB		uses/replaces imnoise
 imsharpenFB		uses/replaces imsharpen
+imshow2			uses/replaces imshow (defaults, view controls, and capabilities differ significantly)
 morphnhood		uses/replaces bwmorph, bwperim, (bwlookup to some extent)
 morphops		uses/replaces imdilate, imopen, imtophat, etc
-nhfilter		uses/replaces medfilt2, stdfilt, rangefilt, (nlfilter to some extent)
+nhfilter		uses/replaces medfilt2, stdfilt, rangefilt, modefilt, (nlfilter/ordfilt2 to some extent)
 padarrayFB		uses/replaces padarray
 stretchlimFB	uses/replaces stretchlim
 
@@ -52,9 +54,10 @@ edgemap			see imgradient, edge
 replacepixels	see imoverlay
 fkgen			see fspecial
 tonemap			see tonemap
-mono			see rgb2gray, rgb2lightness
+mono			see rgb2gray, im2gray, rgb2lightness
 imerror			see immse, psnr
 imcheckerboard	see checkerboard
+pickblobs		see bwselect
 splitchans		see imsplit
 iminv			see imcomplement
 colordiff		see deltaE, imcolordiff

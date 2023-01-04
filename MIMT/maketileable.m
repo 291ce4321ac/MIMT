@@ -37,7 +37,7 @@ revertsize = [1 1];
 
 if numel(varargin) > 0
 	k = 1;
-	while k <= numel(varargin);
+	while k <= numel(varargin)
 		switch lower(varargin{k})
 			case methodstrings
 				method = lower(varargin{k});
@@ -89,8 +89,9 @@ if needsadjusted
 				growthisdim = Pgrow(dim) > 0;
 			else
 				growthisdim = Pgrow(dim) <= Ptrim(dim) || strcmp(method,'grow');
+				growthisdim = growthisdim && ~strcmp(method,'trim');
 			end
-			
+						
 			if growthisdim
 				% grow
 				if dim == 1

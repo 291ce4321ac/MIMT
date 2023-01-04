@@ -679,7 +679,7 @@ outmask = pickblob(inmask,points,'null');
 
 imshow2(outmask,'invert','tools')
 
-%% do the same thing, but use single-frame output and get info
+%%
 % get selected blob(s) and index lists
 [outmask Lidx Fidx] = pickblob(inmask,points,'union','null');
 [points Lidx Fidx]
@@ -770,10 +770,8 @@ clc; clf; clearvars
 A = permute(1:10,[1 3 4 2]); % 10 frames
 B = permute([1 2 3],[1 3 4 2]); % 3 frames
 
-% make them match
 [A B] = matchframes(A,B,'forceframewise');
 
-% illustrate how the shorter image is expanded
 squeeze(A).'
 squeeze(B).'
 

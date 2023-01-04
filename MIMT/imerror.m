@@ -14,7 +14,7 @@ function R = imerror(A,B,varargin)
 %     'rms' calculates the RMS value of the difference
 %     'mse' calculates the mean-square of the difference.  This is what immse() does.
 %     'mae' calculates the mean absolute difference
-%     'psnr' calculates the peak signal-noise ratio. When using the 'native option, 
+%     'psnr' calculates the peak signal-noise ratio. When using the 'native' option, 
 %            the peak value is derived from the class of IMAGEA.
 %
 %  Output class is double
@@ -46,13 +46,6 @@ if numel(varargin) > 0
 	end
 end
 
-if strcmp(type,'psnr')
-	if strcmp(normalize,'normalized')
-		wv = 1;
-	else
-		wv = imcast(1,class(A));
-	end
-end
 
 switch normalize
 	case 'normalized'
@@ -69,6 +62,11 @@ switch type
 	case 'mae'
 		R = mean(abs(err(:)));
 	case 'psnr'
+		if strcmp(normalize,'normalized')
+			wv = 1;
+		else
+			wv = double(imcast(1,class(A)));
+		end
 		R = 10*log10(wv^2/mean(err(:).^2));
 end
 

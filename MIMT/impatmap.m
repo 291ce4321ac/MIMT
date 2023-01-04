@@ -88,7 +88,7 @@ inpict = mono(inpict,'y');
 xrange = stretchcont*[0 1] + (1-stretchcont)*stretchlimFB(inpict,0.005).';
 if centerbins
 	% center gl for each inpict bin
-	hl = range(xrange)/(2*nlevels);
+	hl = abs(diff(imrange(xrange)))/(2*nlevels);
 	x = linspace(xrange(1)+hl,xrange(2)-hl,nlevels);
 else
 	x = linspace(xrange(1),xrange(2),nlevels);

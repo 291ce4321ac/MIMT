@@ -65,7 +65,7 @@ function outpict = imtweak(inpict,model,cparams,varargin)
 %       CPARAMS=[1 1 1; 0 0 0] results in no change to INPICT.  Assuming an HSL model, CPARAMS=[0 0.5 0.5; 0.33 0 0.25] 
 %       results in a 120 degree hue rotation and a 50% decrease of saturation. Lightness is both scaled and offset, 
 %       effecting a global contrast reduction while maintaining central gray values. The scale factor associated with 
-%       hue channels is not used. 
+%       hue channels is not used except for its sign. 
 %       
 %   OPTIONS includes the following keys:
 %       'absolute' specifies that the offset parameters in a full 2x3 CPARAMS specification are denormalized values.
@@ -233,7 +233,7 @@ switch lower(model)
 			end
 			for f = 1:nframes
 				hslpict = rgb2hsl(inpict(:,:,:,f));
-				hslpict(:,:,1) = mod(hslpict(:,:,1)+os(1),hmax); % k(1) is unused
+				hslpict(:,:,1) = mod(sign(k(1))*hslpict(:,:,1)+os(1),hmax); % k(1) is unused except for its sign
 				hslpict(:,:,2) = imclamp(os(2) + hslpict(:,:,2)*k(2));
 				hslpict(:,:,3) = imclamp(os(3) + hslpict(:,:,3)*k(3));
 				outpict(:,:,:,f) = hsl2rgb(hslpict);
@@ -257,7 +257,7 @@ switch lower(model)
 			end
 			for f = 1:nframes
 				hsipict = rgb2hsi(inpict(:,:,:,f));
-				hsipict(:,:,1) = mod(hsipict(:,:,1)+os(1),hmax); % k(1) is unused
+				hsipict(:,:,1) = mod(sign(k(1))*hsipict(:,:,1)+os(1),hmax); % k(1) is unused except for its sign
 				hsipict(:,:,2) = imclamp(os(2) + hsipict(:,:,2)*k(2));
 				hsipict(:,:,3) = imclamp(os(3) + hsipict(:,:,3)*k(3));
 				outpict(:,:,:,f) = hsi2rgb(hsipict);
@@ -278,7 +278,7 @@ switch lower(model)
 			% relative scaling for offsets in HSV is trivial due to the channel scaling convention used by RGB2HSV()
 			for f = 1:nframes
 				hsvpict = rgb2hsv(inpict(:,:,:,f));
-				hsvpict(:,:,1) = mod(hsvpict(:,:,1)+os(1),1); % k(1) is unused
+				hsvpict(:,:,1) = mod(sign(k(1))*hsvpict(:,:,1)+os(1),1); % k(1) is unused except for its sign
 				hsvpict(:,:,2) = imclamp(os(2) + hsvpict(:,:,2)*k(2));
 				hsvpict(:,:,3) = imclamp(os(3) + hsvpict(:,:,3)*k(3));
 				outpict(:,:,:,f) = hsv2rgb(hsvpict);
@@ -340,7 +340,7 @@ function outpict = processlch(inpict,changevec,method,lmax,cmax,hmax,truncopt)
 		end
 		for f = 1:nframes
 			lchpict = rgb2lch(inpict(:,:,:,f),method);
-			lchpict(:,:,3) = mod(lchpict(:,:,3)+os(3),hmax); % k(3) is unused
+			lchpict(:,:,3) = mod(sign(k(3))*lchpict(:,:,3)+os(3),hmax); % k(3) is unused except for its sign
 			lchpict(:,:,2) = os(2) + lchpict(:,:,2)*k(2);
 			lchpict(:,:,1) = os(1) + lchpict(:,:,1)*k(1);
 			outpict(:,:,:,f) = lch2rgb(lchpict,method,truncopt);
@@ -364,7 +364,7 @@ function outpict = processhusl(inpict,changevec,method,lmax,smax,hmax)
 		end
 		for f = 1:nframes
 			huslpict = rgb2husl(inpict(:,:,:,f),method);
-			huslpict(:,:,1) = mod(huslpict(:,:,1)+os(1),hmax); % k(1) is unused
+			huslpict(:,:,1) = mod(sign(k(1))*huslpict(:,:,1)+os(1),hmax); % k(1) is unused except for its sign
 			huslpict(:,:,2) = os(2) + huslpict(:,:,2)*k(2);
 			huslpict(:,:,3) = os(3) + huslpict(:,:,3)*k(3);
 			outpict(:,:,:,f) = husl2rgb(huslpict,method);
@@ -388,7 +388,7 @@ function outpict = processhsy(inpict,changevec,method,lmax,smax,hmax)
 		end
 		for f = 1:nframes
 			hsypict = rgb2hsy(inpict(:,:,:,f),method);
-			hsypict(:,:,1) = mod(hsypict(:,:,1)+os(1),hmax); % k(1) is unused
+			hsypict(:,:,1) = mod(sign(k(1))*hsypict(:,:,1)+os(1),hmax); % k(1) is unused except for its sign
 			hsypict(:,:,2) = os(2) + hsypict(:,:,2)*k(2);
 			hsypict(:,:,3) = os(3) + hsypict(:,:,3)*k(3);
 			outpict(:,:,:,f) = hsy2rgb(hsypict,method);

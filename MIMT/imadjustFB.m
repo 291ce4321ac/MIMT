@@ -28,6 +28,9 @@ if ~exist('gamma','var'); gamma = 1; end
 if isempty(inrange); inrange = [0 1]; end
 if isempty(outrange); outrange = [0 1]; end
 
+inrange = imclamp(inrange);
+outrange = imclamp(outrange);
+
 % IF IPT IS INSTALLED
 if license('test', 'image_toolbox')
 	if automode

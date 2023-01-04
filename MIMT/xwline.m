@@ -69,20 +69,25 @@ function outpict = xwline(imagesize,X,Y)
 		% main loop
 		k = 5;
 		for i = (xpxl1 + 1):(xpxl2 - 1)
-			x(k) = i; y(k) = ipart (intery); c(k) = rfpart (intery);
+			x(k) = i;
+			y(k) = ipart(intery);
+			c(k) = rfpart(intery);
 			k = k+1;
-			x(k) = i; y(k) = ipart (intery) + 1; c(k) = fpart (intery);
+			x(k) = i; 
+			y(k) = ipart(intery) + 1;
+			c(k) = fpart(intery);
 			intery = intery + gradient; 
 			k = k+1;
 		end
-
-		%truncate the vectors to proper sizes
-		x = min(max(x(1:k-1),1),imagesize(2));
-		y = min(max(y(1:k-1),1),imagesize(1));
-		c = c(1:k-1);    
+  
 		if swapped         
-		  [x y] = swap (x, y);
+		  [x y] = swap(x, y);
 		end 
+		
+		%truncate the vectors to proper sizes
+		x = imclamp(x(1:k-1),[1 imagesize(2)]);
+		y = imclamp(y(1:k-1),[1 imagesize(1)]);
+		c = c(1:k-1);  
 		
 		outpict(sub2ind(size(outpict),y,x)) = c;
 	end

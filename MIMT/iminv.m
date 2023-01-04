@@ -9,6 +9,7 @@ function inpict = iminv(inpict)
 % See also: imcomplement
 
 % getrangefromclass() is an IPT dependency in legacy versions
+% imclassrange() now exists, but eh.
 if isnumeric(inpict)
 	inclass = class(inpict);
 	switch inclass(1)

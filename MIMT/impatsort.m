@@ -196,7 +196,7 @@ for f = 1:npats
 	% discard images with high contrast
 	% limiting contrast may be desirable when using grayscale textures
 	if maxcontrast<1
-		discardthese(f) = discardthese(f) || imcast(range(thisf(:)),'double')>maxcontrast;
+		discardthese(f) = discardthese(f) || imcast(abs(diff(imrange(thisf(:)))),'double')>maxcontrast;
 	end
 	
 	if ~discardthese(f)

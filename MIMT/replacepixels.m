@@ -133,7 +133,7 @@ function complinear()
 		FG = rgb2linear(FG);
 		BG = rgb2linear(BG);
 	end
-
+	
 	% let mask/alpha expand as necessary
 	if isempty(FGA)
 		FGA = mask;
@@ -153,6 +153,7 @@ function complinear()
 	% output does not have alpha unless BG has alpha
 	if ~isempty(BGA)
 		outalpha = As+Ad;
+		outpict = bsxfun(@rdivide,outpict,outalpha+eps);
 		outpict = joinalpha(outpict,outalpha);
 	end
 	

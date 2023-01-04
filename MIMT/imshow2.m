@@ -35,6 +35,11 @@ function kimg = imshow2(varargin)
 %    'invert' will invert the displayed image
 %    'tools' will show additional view tools for convenient browsing
 %    Specifying 'tools' option overrides 'parent' option.
+%
+%    KNOWN ISSUES:
+%    Does not play nicely with the new axes view controls implemented in R2018a.
+%    For that reason, axes toolbar is disabled in newer versions.
+%    May barf harmless errors when a docked figure is resized.
 % 
 % See also: imshow, imcompare
 
@@ -54,7 +59,7 @@ showoog = 0;
 togglestate = [1 1 1 1 1]; % IRGBA
 
 k = 1;
-while k <= length(varargin);
+while k <= length(varargin)
 	if isimageclass(varargin{k})
 		inputimage = varargin{k};
 		k = k+1;
@@ -131,10 +136,6 @@ end
 
 
 
-%% GET VARNAME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function out = varname(var)
-	out = inputname(1);
-end
 
 %% FULL FIGURE SETUP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function figuresetup()
@@ -687,6 +688,17 @@ function updatefig()
 	k = safeimshow(imagetoshow,ha);
 	akzoom(ha) 
 	
+	% view controls in the R2018a axes toolbar break akzoom
+	% just disable the dumb thing
+	persistent hasaxtb
+	if isempty(hasaxtb)
+		hasaxtb = ifversion('>=','R2018a');
+	end
+	if hasaxtb
+		tb = axtoolbar(ha);
+		tb.Visible = 'off';
+	end
+	
 	if tools == 1
 		hf = handles.imshow2figure;
 	else 
@@ -741,7 +753,6 @@ function setparam(objh,~,whichparam)
 					inputimage = evalin('base',inputimagestring);
 				catch
 					errstr = sprintf('IMSHOW2: Invalid image ''%s''\n',inputimagestring);
-					%disp(errstr)
 					errordlg(errstr,'Import Error','modal')
 				end
 			end

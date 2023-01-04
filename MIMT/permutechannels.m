@@ -38,7 +38,7 @@ if all(abs(order) > 3 | order == 0)
 end
 
 outpict = zeros(size(inpict));
-for f = 1:1:size(inpict,4);
+for f = 1:1:size(inpict,4)
 	if strcmpi(mode,'rgb')
         wpict = inpict(:,:,:,f);
 	elseif strcmpi(mode,'hsv')
@@ -57,7 +57,7 @@ for f = 1:1:size(inpict,4);
 	end
     
 	rpict = wpict;	
-    for c = 1:1:3;
+    for c = 1:1:3
         rpict(:,:,c) = (order(c) < 0)+sign(order(c))*wpict(:,:,abs(order(c)));
     end
     

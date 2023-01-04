@@ -12,6 +12,8 @@
 % Don't try running the whole file straight; it'll just clobber its own output.
 % Pick a section to run, use ctrl-enter or click "Run Section" from the Editor toolbar
 
+return; % prevents the entire file from being run straight-through
+
 %% colorpict demo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 s = [200 300];
@@ -27,8 +29,6 @@ outpict = colorpict(s,c,'uint8');
 
 imshow(outpict)
 %imwrite(outpict,'examples/colorpictex2.jpg','jpeg','Quality',90);
-
-return; % prevents the entire file from being run straight-through
 
 %% cropborder demo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %inpict=imread('sources/probe.jpg');
@@ -489,7 +489,7 @@ dpict = picdynamics(inpict,10,60,'squeeze','rgb');
 sluramt = [1 0; 0 0; -1 0]*4;
 slurpict = jpegslur(inpict,sluramt,1,10,'original');
 outpict = imblend(dpict,slurpict,1,'contrast',1.5);
-outpict = imblend(mono(meanlines(slurpict,1),'y'),outpict,1,'contrast',0.7);
+outpict = imblend(mono(meanlines(slurpict,2),'y'),outpict,1,'contrast',0.7);
 
 imshow2(outpict,'invert','tools')
 %imwrite(dpict,'examples/picdynamicsex1.jpg','jpeg','Quality',90);
@@ -1037,7 +1037,7 @@ cvec = [0 0.3 1];
 hsvpict = imtweak(inpict,'hsv',cvec);
 hsipict = imtweak(inpict,'hsi',cvec);
 hslpict = imtweak(inpict,'hsl',cvec);
-ypppict = imtweak(inpict,'ypbpr',fliplr(cvec));
+ypppict = imtweak(inpict,'ych',fliplr(cvec));
 hsypict = imtweak(inpict,'hsy',cvec);
 lchabpict = imtweak(inpict,'lchab',fliplr(cvec));
 lchuvpict = imtweak(inpict,'lchuv',fliplr(cvec));
@@ -1064,7 +1064,7 @@ cvec = [0 3 1];
 hsvpict = imtweak(inpict,'hsv',cvec);
 hsipict = imtweak(inpict,'hsi',cvec);
 hslpict = imtweak(inpict,'hsl',cvec);
-ypppict = imtweak(inpict,'ypbpr',fliplr(cvec));
+ypppict = imtweak(inpict,'ych',fliplr(cvec));
 hsypict = imtweak(inpict,'hsy',cvec);
 lchabpict = imtweak(inpict,'lchab',fliplr(cvec));
 lchuvpict = imtweak(inpict,'lchuv',fliplr(cvec));
@@ -1082,7 +1082,7 @@ set(gca,'position',[0.01 0.01 0.98 0.98]);
 imshow(comparison)
 %imwrite(comparison,'examples/imtweakex2.jpg','jpeg','Quality',90);
 %% 
-%clear all; clc;
+clear all; clc;
 format compact;
 inpict = imread('sources/blacklight2.jpg');
 
@@ -1090,7 +1090,7 @@ cvec = [0.5 1 1];
 hsvpict = imtweak(inpict,'hsv',cvec);
 hsipict = imtweak(inpict,'hsi',cvec);
 hslpict = imtweak(inpict,'hsl',cvec);
-ypppict = imtweak(inpict,'ypbpr',fliplr(cvec));
+ypppict = imtweak(inpict,'ych',fliplr(cvec));
 hsypict = imtweak(inpict,'hsy',cvec);
 lchabpict = imtweak(inpict,'lchab',fliplr(cvec));
 lchuvpict = imtweak(inpict,'lchuv',fliplr(cvec));
@@ -1108,7 +1108,7 @@ set(gca,'position',[0.01 0.01 0.98 0.98]);
 imshow(comparison)
 %imwrite(comparison,'examples/imtweakex3.jpg','jpeg','Quality',90);
 %% HuSLp HSYp tweak demo
-%clear all; clc;
+clear all; clc;
 format compact;
 inpict = imread('sources/blacklight2.jpg');
 
@@ -1166,6 +1166,31 @@ comparison = replacepixels(bg,dots,mask);
 
 imshow(comparison)
 %imwrite(comparison,'examples/imtweakex8.jpg','jpeg','Quality',90);
+
+%% imtweak with full spec
+A = imread('sources/table.jpg');
+
+model = 'lchab';
+B = imtweak(A,model,[0.5 1.5 0; 0.25 0 -0.2]);
+
+imshow2(B,'invert')
+
+%% imtweak with absolute and relative offset spec
+A = imread('peppers.png');
+A = imresize(A,0.5);
+
+model = 'oklab';
+Cr = imtweak(A,model,[1.1 0.5 1; -0.05 0.31 0.095]);
+Ca = imtweak(A,model,[1.1 0.5 1; -5 10 3],'absolute');
+
+% same relative offset gives similar output with a different model
+% but using abs offsets requires rescaling
+model = 'lab';
+Dr = imtweak(A,model,[1.1 0.5 1; -0.05 0.31 0.095]);
+Da = imtweak(A,model,[1.1 0.5 1; -5 42 13],'absolute');
+
+imshow2([Cr Dr; Ca Da],'invert')
+
 %% rgb2husl demo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 s = [250 250 3];
 inpict = lingrad(s,[0 0; 0 1],[1 0 0; 1 1 0; 0 1 0; 0 1 1; 0 0 1; 1 0 1; 1 0 0]*255);
@@ -1579,7 +1604,7 @@ hsyset = bg;
 for k = 1:st
     lchrot = imtweak(lchset(:,:,:,k),'lchab',[1 1 1/st]);
     huslrot = imtweak(huslset(:,:,:,k),'huslab',[1/st, 1, 1]);
-    ypprot = imtweak(yppset(:,:,:,k),'ypbpr',[1 1 1/st]);
+    ypprot = imtweak(yppset(:,:,:,k),'ych',[1 1 1/st]);
     hsyrot = imtweak(hsyset(:,:,:,k),'hsy',[1/st, 1, 1]);
     
     lchset = cat(4,lchset,lchrot);
@@ -1682,7 +1707,7 @@ lch = cat(3,L,C,H);
 rgb = lch2rgb(lch,'lab','nogc');
 ingamut = ~(any(rgb < 0,3) | any(rgb > 1,3));
 gamut = bsxfun(@times,rgb,ingamut);
-gamut = flipdim(gamut,1);
+gamut = flipd(gamut,1);
 
 imshow(gamut)
 %imwrite(gamut,'examples/maxchromaex4.png','png');
@@ -1719,7 +1744,7 @@ rgb = lch2rgb(lch,'srlab','nogc');
 ingamut = ~(any(rgb < 0,3) | any(rgb > 1,3));
 gamuty = bsxfun(@times,rgb,ingamut);
 
-gamut = cat(1,flipdim(gamutb,1),flipdim(gamuty,1));
+gamut = cat(1,flipd(gamutb,1),flipd(gamuty,1));
 
 imshow(gamut)
 %imwrite(gamut,'examples/maxchromaex5.png','png');
@@ -2542,6 +2567,17 @@ out = cat(1,A,B);
 imshow2('out','invert','tools')
 %imwrite(out,'examples/nhfilterex1.jpg')
 
+%% 
+
+inpict = imread('sources/blacklight2.jpg');
+
+A = nhfilter(inpict,'stdn');
+B = nhfilter(inpict,'localcont');
+out = cat(1,A,B);
+
+imshow2('out','invert','tools')
+%imwrite(out,'examples/nhfilterex1.jpg')
+
 %% imnoiseFB demo
 
 inpict = imread('sources/colorballs.jpg');
@@ -2930,7 +2966,7 @@ imshow(rgbpict)
 % bigrgb = hsv2rgb(cat(3,hh(:),ss(:),vv(:)));
 % [rr gg bb] = imsplit(bigrgb);
 
-[rr gg bb] = ndgrid(linspace(0,1,15));
+[rr gg bb] = ndgrid(linspace(0,1,256));
 bigrgb = cat(3,rr(:),gg(:),bb(:));
 
 [H W B] = splitchans(rgb2hwb(bigrgb));
@@ -3014,239 +3050,5 @@ C = siftpixels(A,-cn);
 
 imshow2(C,'invert')
 
-%% flattenbg demo
-clc; clf; clear variables
-
-% this isn't really a technically appropriate use-case, but it's at least a demonstration
-A = imread('sources/tree.jpg');
-
-B = flattenbg(A,200);
-
-imshow2(B,'invert')
-
-%% colordiff demo
-
-A = [0.8 0.2 1];
-B = [0.8 0.2 0.999];
-
-colordiff(A,B,'lab','de76')
-colordiff(A,B,'lab','de94')
-
-%% solarize demo
-clc; clf; clear variables
-
-A = imread('sources/tree.jpg');
-
-B = solarize(A);
-C = solarize(A,'vee');
-outpict = [B C];
-
-imshow2(outpict,'invert')
-
-%% 
-clc; clf; clear variables
-
-A = imread('sources/tree.jpg');
-
-in = [0 0.10 0.70 0.94 1]; 
-out = [0 0.10 0.90 0.08 0];
-B = solarize(A,'in',in,'out',out);
-C = solarize(A,'vee','interpmode','cubic');
-outpict = [B C];
-
-imshow2(outpict,'invert')
-
-%% 
-clc; clf; clear variables
-
-A = linspace(0,1,100);
-
-B = solarize(A);
-C = solarize(A,'vee');
-
-p(1) = plot(A,A); hold on
-p(2) = plot(A,B);
-p(3) = plot(A,C);
-legend(p,{'input','''default''','''vee'''},'location','northwest')
-
-%% imcurves demo
-clc; clf; clear variables
-
-A = imread('sources/blacklight2.jpg');
-A = imresize(A,0.5);
-
-B = imcurves(A,[0 0.5 1],[0 1 0],'color');
-C = imcurves(A,[0 0.5 1],[0 1 0],'hsl');
-D = imcurves(A,[0 0.5 1],[0 1 0],'lchuv');
-outpict = [B; C; D];
-
-imshow2(outpict,'invert')
-
-%% 
-[x y] = meshgrid(linspace(0,1,100));
-A = cat(3,x,x,x,y); % RGBA image
-
-B = imcurves(A,[0 0.5 1],[0 1 0],'color');
-C = imcurves(A,[0 0.5 1],[0 1 0],'all');
-outpict = [B C];
-
-imshow2(outpict,'invert')
-
-%% ctflop demo
-
-n = 10;
-CThusl = [linspace(0,300,n).', ...
-	     100*ones(n,1), 70*ones(n,1)];
-
-CTrgb = ctflop(husl2rgb(ctflop(CThusl),'luvp'))
-demopict = imresize(repmat(ctflop(CTrgb),[1 n]),10,'nearest');
-
-imshow(demopict)
-
-%% splitalpha demo
-clc; clf; clear variables
-
-[x y] = meshgrid(linspace(0,1,100));
-A = cat(3,0.7*x,0.2*x,0.9*x,y); % RGBA image
-
-[Acolor Aalpha] = splitalpha(A);
-
-subplot(1,3,1)
-imshow2(A,'invert')
-subplot(1,3,2)
-imshow2(Acolor,'invert')
-subplot(1,3,3)
-imshow2(Aalpha,'invert')
-
-%% colorbalance demo
-clc; clf; clear variables
-
-A = imread('sources/blacklight2.jpg');
-
-K = [1 0 -1; 0 0 0; -1 0 1];
-B = colorbalance(A,K);
-
-imshow2(B,'invert')
-%imwrite(B,'examples/colorbalanceex1.jpg')
-
-%% imbcg demo
-clc; clf; clear variables
-
-A = imread('sources/blacklight2.jpg');
-
-B = imbcg(A,'b',0.6);
-C = imbcg(A,'b',0.6,'gimpmode');
-outpict = [B;C];
-
-imshow2(outpict,'invert')
-%imwrite(outpict,'examples/imbcgex1.jpg')
-
-%% mixchannels demo
-clc; clf; clear variables
-
-A = imread('sources/blacklight2.jpg');
-
-K = [0.5 0.3 0.2; 0 0.3 0.7; 0.5 0 0.5];
-outpict = mixchannels(A,K);
-
-imshow2(outpict,'invert')
-%imwrite(outpict,'examples/mixchannelsex1.jpg')
-
-%% gcolorize demo
-clc; clf; clear variables
-
-A = imread('sources/blacklight2.jpg');
-
-K = [300 50 0];
-outpict = gcolorize(A,K);
-
-imshow2(outpict,'invert')
-%imwrite(outpict,'examples/gcolorizeex1.jpg')
-
-%% ghlstool demo
-clc; clf; clear variables
-
-A = imread('sources/blacklight2.jpg');
-
-K = [60 50 0];
-outpict = ghlstool(A,K);
-
-imshow2(outpict,'invert')
-%imwrite(outpict,'examples/ghlstoolex1.jpg')
-
-%% tonergb demo
-clc; clf; clear variables
-
-inpict = imread('sources/vegetables.jpg');
-
-Tr = [00,00,00; 10,25,50; 00,00,00]/255; 
-Tg = [00,00,00; -10,-25,-50; 00,00,00]/255;
-Tb = [00,00,00; 00,00,00; 00,00,00]/255; 
-Tsat = [0,0,128,255,255]/255;
-outpict = tonergb(inpict,Tr,Tg,Tb,Tsat,'preserve');
-
-imshow2(outpict,'invert')
-%imwrite(outpict,'examples/tonergbex1.jpg')
-
-%% tonecmyk demo
-clc; clf; clear variables
-
-inpict = imread('sources/vegetables.jpg');
-
-% modern film
-Tc = [00,20,00; 00,08,00; 00,00,00; 00,-23,00]/255;
-Tm = [00,-13,00; 00,17,00; 00,00,00; -1,29,00]/255;
-Ty = [00,00,00; 00,00,-12; 00,00,00; 19,68,18]/255;
-Tk = [00,00,00; 00,00,00; 00,00,00; -5,55,-15 ]/255;
-Tsat = [128,255,255,255,255]/255;
-outpict = tonecmyk(inpict,Tc,Tm,Ty,Tk,Tsat,'preserve');
-
-imshow2(outpict,'invert')
-%imwrite(outpict,'examples/tonecmykex1.jpg')
-
-%% tonepreset demo
-clc; clf; clear variables
-
-inpict = imread('sources/vegetables.jpg');
-
-B = tonepreset(inpict,'warmvintage');
-C = tonepreset(inpict,'fadedprint',1.5);
-outpict = [B;C];
-
-imshow2(outpict,'invert')
-%imwrite(outpict,'examples/tonepresetex1.jpg')
-
-%% unsharp demo
-clc; clf; clear variables
-
-inpict = imread('sources/vegetables.jpg');
-
-B = unsharp(inpict);
-C = unsharp(inpict,10,0.5);
-outpict = [B;C];
-
-imshow2(outpict,'invert')
-%imwrite(outpict,'examples/unsharpex1.jpg')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+%% THIS FILE IS GETTING TOO LONG
+%% SEE DEMOSANDBOX2.M FOR MORE

@@ -51,20 +51,7 @@ function thisrange = getrange(x)
 	if isnumeric(x)
 		thisrange = double(x);
 	elseif ischar(x)
-		switch x
-			case {'single','double','logical'}
-				thisrange = [0 1];
-			case 'uint8'
-				thisrange = [0 255];
-			case 'int8'
-				thisrange = [-128 127];
-			case 'uint16'
-				thisrange = [0 65535];
-			case 'int16'
-				thisrange = [-32768 32767];
-			otherwise
-				error('IMRESCALE: %s is not a standard image class',x)
-		end
+		thisrange = imclassrange(x);
 	end
 end
 

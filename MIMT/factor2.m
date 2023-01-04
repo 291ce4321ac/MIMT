@@ -67,7 +67,6 @@ if numel(varargin)>0
 			otherwise
 				error('FACTOR2: unknown key %s',thisarg)
 		end
-		
 	end
 end
 
