@@ -629,8 +629,16 @@
 % uint2hex()
 % hex2uint()
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.51 update
 
+% FIXED
+% amedfilt() was using padarray() instead of padarrayFB()
 
+% IMPROVED 
+% added a bunch of shitty HSV/HSI 'color' modes back to imblend() for no good reason
+% added colormodetiming.m to demo scripts to accompany all the superfluous new color blend modes
+% minor speed improvement to rgb2hsl()
 
 
 

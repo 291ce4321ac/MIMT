@@ -1074,19 +1074,44 @@ switch modestring
 		Ilch = rgb2lch(I,'luv');
 		mask = Mlch(:,:,2) < Ilch(:,:,2);
 		R = bsxfun(@times,M,mask) + bsxfun(@times,I,1-mask);
-
-	case 'color' % swap H & S in HSL; preserve initial Y
+		
+	% swap HS in HSx; preserve initial Y
+	% here, truncation occurs in RGB
+	case {'color' 'colorhsly' 'colorhsvy' 'colorhsiy'}
 		A = gettfm('ypbpr',rec);
 		Ai = gettfm('ypbpr_inv',rec);
-
 		Y = imappmat(I,A(1,:,:));
-		Mhsl = rgb2hsl(M);
-		Rhsl = rgb2hsl(I);
-		Rhsl(:,:,1:2) = Mhsl(:,:,1:2);
-		R = hsl2rgb(Rhsl);
+		
+		switch modestring
+			case {'color','colorhsly'}
+				R = blendcolorhsl(M,I);
+			case 'colorhsvy'
+				R = blendcolorhsv(M,I);
+			case 'colorhsiy'
+				R = blendcolorhsi(M,I);
+		end
 
 		Rpbpr = imappmat(R,A(2:3,:,:));
 		R = imappmat(cat(3,Y,Rpbpr),Ai);
+		
+	% swap HS in HSx; preserve initial Y (chroma-limited transform)
+	% here, truncation occurs on chroma in LCHbr (polar YPbPr)
+	case {'colorhslyc' 'colorhsvyc' 'colorhsiyc'}
+		A = gettfm('ypbpr',rec);
+		Y = imappmat(I,A(1,:,:));
+		
+		switch modestring
+			case 'colorhslyc'
+				R = blendcolorhsl(M,I);
+			case 'colorhsvyc'
+				R = blendcolorhsv(M,I);
+			case 'colorhsiyc'
+				R = blendcolorhsi(M,I);
+		end
+
+		Rlchbr = rgb2lch(R,'ypbpr');
+		Rlchbr(:,:,1) = Y;
+		R = lch2rgb(Rlchbr,'ypbpr','truncatelch');
 
 	case 'colorhsyp' % swap H & S in HSYp
 		Mhsy = rgb2hsy(M,'pastel');
@@ -1107,10 +1132,13 @@ switch modestring
 		R = lch2rgb(Rlch,'srlab','truncatelch');
 
 	case 'colorhsl' % swap H & S in HSL
-		Mhsl = rgb2hsl(M);
-		Rhsl = rgb2hsl(I);
-		Rhsl(:,:,1:2) = Mhsl(:,:,1:2);
-		R = hsl2rgb(Rhsl);
+		R = blendcolorhsl(M,I);
+		
+	case 'colorhsv' % swap H & S in HSV
+		R = blendcolorhsv(M,I);
+		
+	case 'colorhsi' % swap H & S in HSI
+		R = blendcolorhsi(M,I);
 
 	case 'value'
 		Mhsv = rgb2hsv(M);
@@ -1802,6 +1830,28 @@ function Rout = meshblend(A,B,thisamount,interpolation)
 		end
 	end
 end
+
+function R = blendcolorhsl(M,I)
+	Mhsl = rgb2hsl(M);
+	Rhsl = rgb2hsl(I);
+	Rhsl(:,:,1:2) = Mhsl(:,:,1:2);
+	R = hsl2rgb(Rhsl);
+end
+
+function R = blendcolorhsv(M,I)
+	Mhsv = rgb2hsv(M);
+	Rhsv = rgb2hsv(I);
+	Rhsv(:,:,1:2) = Mhsv(:,:,1:2);
+	R = hsv2rgb(Rhsv);
+end
+
+function R = blendcolorhsi(M,I)
+	Mhsi = rgb2hsi(M);
+	Rhsi = rgb2hsi(I);
+	Rhsi(:,:,1:2) = Mhsi(:,:,1:2);
+	R = hsi2rgb(Rhsi);
+end
+		
 
 end % END MAIN SCOPE
 

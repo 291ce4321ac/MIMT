@@ -199,13 +199,15 @@ function  outpict = imblend(FG,BG,opacity,blendmode,varargin)
 %       cmod divide     (continuized version of 'moddivide')         amount:[0 to +inf)
 %
 %   Component
-%       hue             (H in CIELCHab)
-%       saturation      (C in CIELCHab)
-%       color           (HS in HSL, preserve Y)
+%       color           (shorthand for 'color hsly')
+%       color hs{x}yc   (HS in HSL/HSV/HSI, luma-corrected, chroma-limited)
+%       color hs{x}y    (HS in HSL/HSV/HSI, luma-corrected)
+%       color hs{x}     (HS in HSL/HSV/HSI)
+%       color hsyp      (HS in HSYp)
 %       color lchab     (CH in CIELCHab)
 %       color lchsr     (CH in SRLAB2 LCH)
-%       color hsl       (HS in HSL)
-%       color hsyp      (HS in HSYp)
+%       hue             (H in CIELCHab)
+%       saturation      (C in CIELCHab)
 %       value           (max(R,G,B))
 %       luma            (Rec601 or {Rec709})
 %       lightness       (mean(min(R,G,B),max(R,G,B)))
@@ -581,10 +583,16 @@ function  outpict = imblend(FG,BG,opacity,blendmode,varargin)
 %       just load the script lost_bomb_recovery.m and follow the instructions.
 %		
 %       COLOR MODES: 
-%       'color' is a variant of the HSL method with an attempt to enforce luma preservation (fast)
-%       'color hsyp' attempts to provide best uniformity, at the cost of maximum chroma range.
+%       (BEST) 'lchab/sr' > 'hslyc' > 'hsly' (FAST)
+%       'color hsxyc' modes are similar to 'color hsxy' modes, but the YPbPr transformation is chroma-limited.
+%       'color hsly', 'color hsvy' and 'color hsiy' are luma-corrected HS-swaps in the named models.
+%       This reduces some brightness distortion problems with highly saturated overlay colors.
+%       'color hsly', aka 'color' tends to give good results and is faster than the LCH or hslyc methods.
 %       'color hsl' matches the legacy 'color' blend mode in GIMP
-%        Based only on experiment, LCHab method best approximates Photoshop behavior.
+%       Uncorrected HSL/HSV/HSI modes are included only for sake of demonstration.
+%       'color hsyp' attempts to provide good uniformity, at the cost of maximum chroma range.
+%       'color lchsr' best approximates Photoshop behavior.
+%       'color lchsr' is similar to the LCHab method, but with less blue-purple hue shift.
 %
 %       The 'hue' & 'saturation' modes are derived from LCHab instead of HSL as in GIMP.
 %       If H or S modes are desired in HuSL, HSY, HSI or HSV, use 'transfer' instead.

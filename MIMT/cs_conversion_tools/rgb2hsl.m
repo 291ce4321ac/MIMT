@@ -26,7 +26,7 @@ function outpict = rgb2hsl(inpict)
 inpict = imcast(inpict,'double');
 
 mn = min(inpict,[],3);
-mx = max(inpict,[],3);
+[mx idx] = max(inpict,[],3);
 L = (mn+mx)/2;
 
 D = mx-mn;
@@ -38,9 +38,6 @@ md = (D == 0);
 D = D+md;
 
 H = zeros(size(S));
-
-[~,idx] = sort(inpict,3);
-idx = idx(:,:,3); % index of max([r g b])
 
 R = inpict(:,:,1);
 G = inpict(:,:,2);

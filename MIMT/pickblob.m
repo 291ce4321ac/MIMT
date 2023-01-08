@@ -72,9 +72,8 @@ end
 	
 % clean up point list
 npoints = size(points,1);
-points = round(points);
 badpts = any(points<1,2) | points(:,2)>sz(1) | points(:,1)>sz(2);
-points = points(~badpts,:);
+points = round(points(~badpts,:));
 
 % if there aren't any valid points, there's nothing to do
 if isempty(points)

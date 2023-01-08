@@ -9,7 +9,50 @@
 % Don't try running the whole file straight; it'll just clobber its own output.
 % Pick a section to run, use ctrl-enter or click "Run Section" from the Editor toolbar
 
-%% color blend modes demo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+return; % this is just here to prevent the file from being run in whole
+
+%% old color blend modes demo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clearvars; clc; clf
+
+% foreground are saturated primary-secondary colors (and lower-sat copies)
+sz = [200 100 3];
+H = repmat(linspace(0,360,sz(2)),[sz(1) 3]);
+S = reshape(repmat(ctflop([1 0.5 0.25]),sz(1:2)),sz(1),[]);
+L = 0.5*ones(sz(1),sz(2)*3);
+%S = ones(sz(1),sz(2)*3);
+%L = reshape(repmat(ctflop([0.75 0.5 0.25]),sz(1:2)),sz(1),[]);
+
+FG = hsl2rgb(cat(3,H,S,L));
+
+% background is gray
+Y = repmat(linspace(1,0,sz(1)).',[1 sz(2)*3]);
+
+%imshow2(FG,'invert')
+
+modenames = {'color hslyc','color hsvyc','color hsiyc', ...
+	'color hsly','color hsvy','color hsiy', ...
+	'color hsl','color hsv','color hsi', ...
+	'color lchab','color lchsr','color hsyp'};
+
+nframes = numel(modenames);
+imstack = cell(nframes,1);
+Yerror = zeros(nframes,1);
+LSerror = zeros(nframes,1);
+for f = 1:nframes
+	imstack{f} = imblend(FG,Y,1,modenames{f});
+	Yerror(f) = imerror(mono(imstack{f},'y'),Y);
+	LSerror(f) = imerror(mono(imstack{f},'llch'),Y);
+end
+imstack = imstacker(imstack,'padding',0);
+outpict = imtile(imstack,[4 3]);
+%outpict = mono(outpict,'y');
+
+imshow2(outpict,'invert')
+
+% error in retaining [Y(BT601) L*]
+[Yerror LSerror]
+
+%% old color blend modes demo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clearvars; clc; clf
 
 bg = imread('sources/table.jpg');
@@ -22,43 +65,45 @@ S = ones(size(Hx))*0.8;
 Y = ones(size(Hx))*0.5;
 fg1 = hsy2rgb(cat(3,mod(Hx+Hy,360),S,Y),'pastel');
 %fg1=lingrad(s,[0 0; 1 0],[1 1 0; 1 0 0]*255);
-
 fg2 = flipd(fg1,1);
 mask = eoline(ones(s(1:2)),2,[20 40]);
 fg = replacepixels(fg1,fg2,mask);
-%huemask=lingrad(s,[0 0; 0 1],[0 0 0; 1 1 1]*255);
-%fg=imblend(huemask,fg,1,'permute y>h',0.5);
 
-A = imblend(fg,bg,1,'color');
-B = imblend(fg,bg,1,'color lchab');
-C = imblend(fg,bg,1,'color lchsr');
-D = imblend(fg,bg,1,'color hsyp');
-E = imblend(fg,bg,1,'color hsl');
 
+modenames = {'color hslyc','color hsvyc','color hsiyc', ...
+	'color hsly','color hsvy','color hsiy', ...
+	'color hsl','color hsv','color hsi', ...
+	'color lchab','color lchsr','color hsyp'};
+
+nframes = numel(modenames);
+imstack = cell(nframes,1);
+errstack = cell(nframes,1);
+Yerror = zeros(nframes,1);
+LSerror = zeros(nframes,1);
 Y0 = double(mono(bg,'y'));
 L0 = double(mono(bg,'llch'));
-a = uint8((abs(Y0-double(mono(A,'y')))+abs(L0-double(mono(A,'llch'))))/2);
-b = uint8((abs(Y0-double(mono(B,'y')))+abs(L0-double(mono(B,'llch'))))/2);
-c = uint8((abs(Y0-double(mono(C,'y')))+abs(L0-double(mono(C,'llch'))))/2);
-d = uint8((abs(Y0-double(mono(D,'y')))+abs(L0-double(mono(D,'llch'))))/2);
-e = uint8((abs(Y0-double(mono(D,'y')))+abs(L0-double(mono(D,'llch'))))/2);
+for f = 1:nframes
+	imstack{f} = imblend(fg,bg,1,modenames{f});
+	errstack{f} = uint8((abs(Y0-double(mono(imstack{f},'y')))+abs(L0-double(mono(imstack{f},'llch'))))/2);
+	Yerror(f) = imerror(mono(imstack{f},'y'),uint8(Y0));
+	LSerror(f) = imerror(mono(imstack{f},'llch'),uint8(L0));
+end
+outpict = imstacker(imstack,'dim',1,'padding',0);
+errpict = imstacker(errstack,'dim',1,'padding',0);
 
-limits = stretchlimFB(cat(1,a,b,c,d,e));
-error1 = repmat(imadjustFB(cat(1,a,b,c,d,e),limits),[1 1 3]);
-color1 = cat(1,A,B,C,D,E);
-group1 = cat(2,color1,error1);
+limits = stretchlimFB(errpict);
+error1 = repmat(imadjustFB(errpict,limits),[1 1 3]);
+group1 = cat(2,outpict,error1);
 
-imshow2(group1,'invert','tools')
+% i'm going to just retile this clumsily because it's so long
+group1 = imtile(imdetile(group1,[4 1]),[1 4]);
+
+imshow2(group1,'invert')
 %imwrite(fg,'examples/imblendex6.jpg','jpeg','Quality',90);
 %imwrite(group1,'examples/imblendex7.jpg','jpeg','Quality',90);
 
-sa = sum(sum(a))
-sb = sum(sum(b))
-sc = sum(sum(c))
-sd = sum(sum(d))
-se = sum(sum(e))
-
-return;
+% error in retaining [Y(BT601) L*]
+[Yerror LSerror]
 
 %% contrast & light modes demo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clearvars; clc; clf

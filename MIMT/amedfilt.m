@@ -33,7 +33,7 @@ end
 sz = imsize(inpict);
 
 % symmetric should suffice
-inpict = padarray(inpict,[1 1]*rmax,'symmetric','both');
+inpict = padarrayFB(inpict,[1 1]*rmax,'symmetric','both');
 
 % assume most pixels will be copied
 outpict = inpict;
