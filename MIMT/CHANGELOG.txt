@@ -640,7 +640,11 @@
 % added colormodetiming.m to demo scripts to accompany all the superfluous new color blend modes
 % minor speed improvement to rgb2hsl()
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.51.1 update
 
+% FIXED
+% imrotateFB() had IPT passthrough disabled
 
 
 

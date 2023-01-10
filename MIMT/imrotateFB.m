@@ -28,7 +28,7 @@ function outpict = imrotateFB(inpict,angle,varargin)
 
 % IF IPT IS INSTALLED
 % FB method is actually significantly faster for orthogonal rotations, so just use it instead
-if false%license('test', 'image_toolbox') && mod(angle,90) ~= 0
+if license('test', 'image_toolbox') && mod(angle,90) ~= 0
 	outpict = imrotate(inpict,angle,varargin{:});
 	return;
 end

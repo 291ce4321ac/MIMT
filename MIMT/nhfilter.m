@@ -56,7 +56,7 @@ if numel(varargin) > 0
 		thisarg = varargin{k};
 		if isnumeric(thisarg)
 			switch k
-				case 2
+				case {1 2}
 					if any(numel(thisarg) == [1 2])
 						blocksize = thisarg;
 					else
