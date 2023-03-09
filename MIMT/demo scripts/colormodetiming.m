@@ -1,4 +1,9 @@
 clc; clf; clear variables
+% this script does a bunch of blends and times them
+% then it makes a bar chart showing relative timing
+
+% HSV modes are typically fast, since it gets to make use of MATLAB builtins
+% LCH modes are typically slowest, but the expense brings benefits
 
 % requires R2016b or newer for local functions in scripts
 % requires R2013b or newer for timeit()

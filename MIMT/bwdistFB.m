@@ -38,7 +38,7 @@ if max(inpict(:)) == 0
 end
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	if nargout == 1
 		varargout{1} = bwdist(inpict);
 	elseif nargout == 2

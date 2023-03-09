@@ -30,7 +30,7 @@ function outpict = imresizeFB(inpict,scale0,varargin)
 % See also: imresize, drysize
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	outpict = imresize(inpict,scale0,varargin{:});
 	return;
 end

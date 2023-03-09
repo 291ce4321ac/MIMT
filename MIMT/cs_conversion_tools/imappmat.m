@@ -90,7 +90,7 @@ end
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox') && ifversion('>=','R2011b')
+if hasipt() && ifversion('>=','R2011b')
 	if iptmode
 		outpict = imapplymatrix(mat,inpict,offset,outclass);
 	else

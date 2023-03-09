@@ -260,7 +260,7 @@ function buildmetrics()
 	candidatenumbers = num2cell(1:numel(idx));	
 	
 	if isempty(h)
-		warning('IMRECTIFY: No candidate geometries found within the given constraints')
+		quietwarning('IMRECTIFY: No candidate geometries found within the given constraints')
 	end
 end
 

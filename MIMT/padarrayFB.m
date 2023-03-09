@@ -38,7 +38,7 @@ function outpict = padarrayFB(inpict,padsize,varargin)
 % See also: padarray, addborder
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	outpict = padarray(inpict,padsize,varargin{:});
 	return;
 end

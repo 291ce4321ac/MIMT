@@ -15,8 +15,9 @@ function [counts centers] = imhistFB(inpict,varargin)
 % Webdocs: http://mimtdocs.rf.gd/manual/html/imhistFB.html
 % See also: imhist, histc, histcounts
 
+
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	if nargout == 0
 		imhist(inpict,varargin{:});
 	else
@@ -43,7 +44,8 @@ end
 
 % imhist gives bin locations based on their centers
 % histc/histcounts gives bin locations based on their edges
-range = getrangefromclass(inpict);
+% getrangefromclass() was IPT-only in older versions
+range = imclassrange(class(inpict));
 os = 0.5/(N-1);
 breakpoints = (diff(range)*linspace(-os,1+os,N+1)+range(1))';
 centers = (diff(range)*linspace(0,1,N)+range(1))';

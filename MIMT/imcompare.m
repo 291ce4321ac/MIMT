@@ -750,7 +750,7 @@ function viewcontrol(hobj,event,whichop)
 end
 
 function k = safeimshow(imtoshow,h)
-	if license('test', 'image_toolbox')
+	if hasipt()
 		% IF IPT IS INSTALLED
 		k = imshow(imtoshow,'border','tight','parent',h);
 	else

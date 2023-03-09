@@ -111,10 +111,10 @@ if (rmin >= mn || rmax <= mn)
 	% shortcut for trivial case
 	out = ones(sz)*mn;
 	if rmin > mn
-		warning('RANDISUM: RMIN cannot be greater than the mean dictated by S and OUTSIZE.  Using this limiting value instead. RMIN <= %d/%d = %d',s,n,mn)
+		quietwarning('RANDISUM: RMIN cannot be greater than the mean dictated by S and OUTSIZE.  Using this limiting value instead. RMIN <= %d/%d = %d',s,n,mn)
 	end
 	if rmax < mn
-		warning('RANDISUM: RMAX cannot be less than the mean dictated by S and OUTSIZE.  Using this limiting value instead. RMAX >= %d/%d = %d',s,n,mn)
+		quietwarning('RANDISUM: RMAX cannot be less than the mean dictated by S and OUTSIZE.  Using this limiting value instead. RMAX >= %d/%d = %d',s,n,mn)
 	end
 	return;
 end
@@ -145,7 +145,7 @@ switch dmode
 		if lh < uh
 			% proximal boundary is rmin; distribution is tilted down toward rmax
 			if uh > 2*lh
-				warning('RANDISUM: Distal boundary too far from mean.  Above MEAN + 2*(MEAN-RMIN), no results exist. Clamping RMAX at %d',3*mn-2*rmin)
+				quietwarning('RANDISUM: Distal boundary too far from mean.  Above MEAN + 2*(MEAN-RMIN), no results exist. Clamping RMAX at %d',3*mn-2*rmin)
 				rmax = 3*mn-2*rmin;
 			end
 			A = @(x) sqrt(n*((8*mn^2 - 12*mn*rmin - 4*rmax*mn + 4*rmin^2 + 4*rmax*rmin)*x + n*mn^2 - 2*n*mn*rmax + n*rmax^2));
@@ -154,7 +154,7 @@ switch dmode
 		elseif lh > uh
 			% proximal boundary is rmax; distribution is tilted down toward rmin
 			if lh > 2*uh
-				warning('RANDISUM: Distal boundary too far from mean.  Below MEAN - 2*(RMAX-MEAN), no results exist. Clamping RMIN at %d',3*mn-2*rmax)
+				quietwarning('RANDISUM: Distal boundary too far from mean.  Below MEAN - 2*(RMAX-MEAN), no results exist. Clamping RMIN at %d',3*mn-2*rmax)
 				rmax = 3*mn-2*rmax;
 			end
 			A = @(x) sqrt(n*((8*mn^2 - 12*mn*rmax - 4*rmin*mn + 4*rmax^2 + 4*rmin*rmax)*x + n*mn^2 - 2*n*mn*rmin + n*rmin^2));
@@ -205,7 +205,7 @@ switch dmode
 			rmlim = ceil(fzero(F0,[mn mn+2*sig]))+1;
 
 			if rmax < rmlim
-				warning('RANDISUM: Proximal boundary too close to mean. The minimum allowable RMAX for the given parameters is %d.  Using this limiting value instead. See note in help synopsis.',rmlim)
+				quietwarning('RANDISUM: Proximal boundary too close to mean. The minimum allowable RMAX for the given parameters is %d.  Using this limiting value instead. See note in help synopsis.',rmlim)
 				rmax = rmlim;
 			end
 
@@ -219,7 +219,7 @@ switch dmode
 			rmlim = floor(fzero(F0,[mn-2*sig mn]))-1;
 			
 			if rmin > rmlim
-				warning('RANDISUM: Proximal boundary too close to mean. The maximum allowable RMIN for the given parameters is %d.  Using this limiting value instead. See note in help synopsis.',rmlim)
+				quietwarning('RANDISUM: Proximal boundary too close to mean. The maximum allowable RMIN for the given parameters is %d.  Using this limiting value instead. See note in help synopsis.',rmlim)
 				rmin = rmlim;
 			end
 

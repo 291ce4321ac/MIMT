@@ -656,7 +656,7 @@ function viewcontrol(hobj,event,whichop)
 end
 
 function k = safeimshow(imtoshow,h)
-	if license('test', 'image_toolbox')
+	if hasipt()
 		% IF IPT IS INSTALLED
 		k = imshow(imtoshow,'border','tight','parent',h);
 	else
@@ -737,18 +737,12 @@ function managemorphmenuvis()
 end
 
 function hideIPTdependent()
-	if ~license('test', 'image_toolbox')
+	if ~hasipt()
 		% IF IPT IS NOT INSTALLED
 		disp('IMMASK: Image Processing Toolbox not found.  Some features are disabled.')
-		set(handles.localcomponentcheckbox,'visible','off')
-		set(handles.momenu,'visible','off')
-		set(handles.morphbutton,'visible','off')
-		set(handles.seradbox,'visible','off')
-		set(handles.seradlabel,'visible','off')
 		set(handles.roiboolmenu,'visible','off')
 		set(handles.roitypemenu,'visible','off')
 		set(handles.roipolybutton,'visible','off')
-		localcomponent = 0;
 	end
 end
 
@@ -780,7 +774,7 @@ function updatecscontrols()
 	if (numchans-hasalpha) == 1
 		set(handles.csmenu,'visible','off')
 		set(handles.volmenu,'visible','off')
-		set(handles.csaxcheck1,'string',' I Tolerance')
+		set(handles.csaxcheck(1),'string',' I Tolerance')
 	else
 		set(handles.csmenu,'visible','on')
 		set(handles.volmenu,'visible','on')

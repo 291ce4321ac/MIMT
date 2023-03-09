@@ -46,7 +46,7 @@ if ~islogical(inpict)
 end
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	outpict = bwhitmiss(inpict,se,se2);
 	return;
 end

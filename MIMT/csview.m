@@ -386,7 +386,7 @@ end
 
 function face = faceresize(fkern,subdivs)
 	face = imresizeFB(fkern,subdivs,'bilinear'); 	
-	face = max(min(face,1),0);
+	face = imclamp(face);
 end
 
 %% DRAW THINGS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -416,7 +416,13 @@ function addtrajectoryplot()
 	else
 		lv = testpoint(xyz);
 	end
-	lv = [lv; CSPpoint; 0 0 testpoint(xyz(3))];
+	
+	% shift so that projection follows neutral axis
+	if strcmpi(spc,'ycbcr')
+		lv = [lv; CSPpoint; 128 128 testpoint(xyz(3))];
+	else
+		lv = [lv; CSPpoint; 0 0 testpoint(xyz(3))];
+	end
 
 	line(targetax,lv([1 2],1),lv([1 2],2),lv([1 2],3),'color','b','linewidth',lineweight)
 	line(targetax,lv([1 2],1),lv([1 2],2),lv([1 2],3),'color','y','linestyle','--','linewidth',lineweight)

@@ -24,7 +24,7 @@ function [outpict TF] = histeqFB(inpict,varargin)
 % See also: histeq, imhist, imhistFB, imlnc
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	[outpict TF] = histeq(inpict,varargin{:});
 	return;
 end

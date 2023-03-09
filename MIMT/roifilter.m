@@ -108,17 +108,12 @@ end
 
 
 % process everything
-persistent useFB
 if blobwise
 	% bwconncomp() is a tiny bit faster, but it's IPT-only
 	% i don't think it's fast enough to make up for checks
 	% maybe only if the image is large enough
 	
-	if isempty(useFB)
-		useFB = ~license('test', 'image_toolbox');
-	end
-		
-	if useFB
+	if ~hasipt()
 		[L nblobs] = bwlabelFB(logical(mk));
 		% loop is skipped if no blobs are found
 		for kb = 1:nblobs

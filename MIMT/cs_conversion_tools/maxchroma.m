@@ -52,7 +52,7 @@ function C = maxchroma(mode,varargin)
 %   between these points and the face is small, any clipping error is minimal. SRLAB methods have similar
 %   limitations due to undercuts on the blue and yellow corners.  LUV does not have this issue.
 
-for k = 1:2:length(varargin);
+for k = 1:2:length(varargin)
     switch lower(varargin{k})
         case {'h','hue'}
             H = varargin{k+1};

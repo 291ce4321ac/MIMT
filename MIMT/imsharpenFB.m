@@ -23,7 +23,7 @@ function outpict = imsharpenFB(inpict,varargin)
 
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	outpict = imsharpen(inpict,varargin{:});
 	return;
 end

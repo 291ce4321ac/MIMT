@@ -32,7 +32,7 @@ inrange = imclamp(inrange);
 outrange = imclamp(outrange);
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	if automode
 		inrange = stretchlim(inpict);
 	end

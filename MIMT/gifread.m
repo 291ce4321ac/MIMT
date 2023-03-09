@@ -167,6 +167,9 @@ if strcmpi(method,'native')
     end
 else
     % split the gif using imagemagick instead
+	% use ispc()/isunix()/ismac() or computer() to determine os
+	% /dev/shm will only be a convenient option if isunix()
+	% though idk if that's reliably true
     system(sprintf('convert %s /dev/shm/%%03d_gifreadtemp.gif',filepath));
 	infostruct = imfinfo(filepath);
 	
@@ -175,6 +178,7 @@ else
     s = size(image);
 	
 	if allframes
+		% this should probably explicitly look for files by name instead of using ls
 		[~,numframes] = system('ls -1 /dev/shm/*gifreadtemp.gif | wc -l');
 		numframes = str2num(numframes);
 		framelist = 1:numframes;
@@ -188,7 +192,7 @@ else
 	tcidxvec = zeros([1 numframes],'double');
 
 	% build 4-D map
-    for fn = 1:numframes;
+	for fn = 1:numframes
 		f = framelist(fn);
 		try
 			tcidxvec(fn) = infostruct(1,f).TransparentColor;
@@ -196,13 +200,14 @@ else
 			tcidxvec(fn) = NaN;
 		end
 		
-        [thisframe thismap] = imread(sprintf('/dev/shm/%03d_gifreadtemp.gif',f-1), 'gif');
+		[thisframe thismap] = imread(sprintf('/dev/shm/%03d_gifreadtemp.gif',f-1), 'gif');
 		outpict(:,:,:,fn) = thisframe;
 		outmap(1:size(thismap,1),:,:,fn) = thismap;
 		maxtablelength = max(size(thismap,1),maxtablelength);
-    end
+	end
 
-    %system('rm /dev/shm/*gifreadtemp.gif');
+	% get rid of temp files
+    system('rm /dev/shm/*gifreadtemp.gif');
 end
 
 
@@ -243,7 +248,7 @@ if indexed
 	end
 else	
 	rgboutpict = zeros([s(1:2) 3 numframes],outclass);
-	for f = 1:numframes;
+	for f = 1:numframes
 		rgboutpict(:,:,:,f) = imcast(ind2rgb(outpict(:,:,:,f),outmap(:,:,:,f)),outclass);
 	end
 	

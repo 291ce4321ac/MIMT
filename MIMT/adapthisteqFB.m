@@ -33,7 +33,7 @@ function outpict = adapthisteqFB(inpict,varargin)
 
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox') && false
+if hasipt()
 	outpict = adapthisteq(inpict,varargin{:});
 	return;
 end

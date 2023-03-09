@@ -22,12 +22,7 @@ function out = flipd(varargin)
 % 10-15ms for version checking with verLessThan() makes this insignificant for small arrays
 % but ifversion() is much faster
 
-persistent isold
-if isempty(isold)
-	isold = ifversion('<','R2013b');
-end
-
-if isold
+if ifversion('<','R2013b')
 	if numel(varargin) == 1
 		A = varargin{1};
 		if isrow(A)

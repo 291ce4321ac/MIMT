@@ -14,6 +14,8 @@ function ctpath(CT0,varargin)
 %  OPTIONS includes the following keys:
 %    'noline' omits the lines connecting the markers
 %    'invert' inverts the marker colors for use on an inverted display.
+%    '3D' plots the table in 3D (default)
+%    '2D' plots the table in a simplified 2D fashion
 %
 %  See also: csview, ccmap, makect, rgbplot
 
@@ -52,6 +54,7 @@ spc = 'rgb';
 invert = false;
 markersize = 30;
 noline = false;
+is3D = true;
 
 % process inputs
 if nargin>1
@@ -59,6 +62,10 @@ if nargin>1
 		thisarg = varargin{k};
 		if ischar(thisarg)
 			switch lower(thisarg)
+				case '2d'
+					is3D = false;
+				case '3d'
+					is3D = true;
 				case 'invert'
 					invert = true;
 				case 'noline'
@@ -93,35 +100,119 @@ if ndims(CT0)>2 || size(CT0,2)~=3 %#ok<ISMAT>
 end
 CT0 = imcast(CT0,'double');
 CT = ctflop(fromrgb(ctflop(CT0),spc));
-CT = CT(:,xyz); % reorder axes
-if invert
-	CT0 = 1-CT0;
+
+if is3D
+	CT = CT(:,xyz); % reorder axes
+	if invert
+		CT0 = 1-CT0;
+	end
+
+	% plot things
+	hp = plot3(CT(:,1),CT(:,2),CT(:,3),':'); hold on; grid on
+	set(hp,'color',[1 1 1]*0.5);
+	if noline
+		set(hp,'visible',false);
+	end
+	scatter3(CT(:,1),CT(:,2),CT(:,3),markersize,CT0,'filled')
+
+	xlim(plotrange(1,:))
+	ylim(plotrange(2,:))
+	zlim(plotrange(3,:))
+
+	xlabel(plotaxlabels{1})
+	ylabel(plotaxlabels{2})
+	zlabel(plotaxlabels{3})
+
+	% i'm going to assume nobody else wants a dark bg on a noninverted display
+	% if ~invert
+	% 	set(gca,'color',[0 0 0],'gridcolor',[1 1 1]*0.85)
+	% end
+
+else
+	% reorder labels, limits
+	plotaxlabels(xyz) = plotaxlabels;
+	plotrange(xyz,:) = plotrange;
+	
+	% curve colors
+	if invert
+		lc = {'c','m','y'};
+	else
+		lc = {'r','g','b'};
+	end
+
+	% plot first channel to set up main axes
+	x = 1:size(CT,1);
+	plot(x,CT(:,1),lc{1}); hold on;
+	set(gca,'xgrid','on');
+	set(gca,'ycolor',lc{1});
+	ylim(plotrange(1,:))
+	xlim([1 size(CT,1)])
+	
+	% plot other channels
+	for kc = 2:3
+		addaxis(x,CT(:,kc),plotrange(kc,:),lc{kc});
+	end
+	
+	xlabel('CT index');
+	hax = getaddaxisdata(gca,'axisdata');
+	hax = [hax{1:2}];
+	hax = [gca hax(1,:)];
+	
+	x0 = 0.1; % spacing between outermost rulers and figure edge
+	xgap = 0.08; % spacing between rulers
+	fontsize = 8; % base font size for all rulers/labels
+	
+	% get info about ruler locations
+	nlr = nnz(strcmp({hax.YAxisLocation},'left'));
+	nrr = numel(hax) - nlr;
+	
+	% calculate x-offsets for rulers, reorder to match axes order
+	xposl = x0+(0:nlr-1)*xgap;
+	xposr = 1-(x0+(nrr-1:-1:0)*xgap);
+	xpos = zeros(1,numel(hax));
+	xpos(1:2:nlr*2) = fliplr(xposl);
+	xpos(2:2:nrr*2) = xposr;
+	
+	% width of primary axes
+	wax = 1 - ((nlr-1)+(nrr-1))*xgap - 2*x0;
+	
+	% apply properties
+	for k = 1:numel(hax)
+		hax(k).Position(1) = xpos(k);
+		hax(k).YLabel.String = plotaxlabels{k};
+		hax(k).FontSize = fontsize;
+	end
+	hax(1).Position(3) = wax;
 end
-
-% plot things
-hp = plot3(CT(:,1),CT(:,2),CT(:,3),':'); hold on; grid on
-set(hp,'color',[1 1 1]*0.5);
-if noline
-	set(hp,'visible',false);
-end
-scatter3(CT(:,1),CT(:,2),CT(:,3),markersize,CT0,'filled')
-
-xlim(plotrange(1,:))
-ylim(plotrange(2,:))
-zlim(plotrange(3,:))
-
-xlabel(plotaxlabels{1})
-ylabel(plotaxlabels{2})
-zlabel(plotaxlabels{3})
-
-% i'm going to assume nobody else wants a dark bg on a noninverted display
-% if ~invert
-% 	set(gca,'color',[0 0 0],'gridcolor',[1 1 1]*0.85)
-% end
 
 % create custom datacursor to view index
 dcm_obj = datacursormode(gcf);
 set(dcm_obj,'UpdateFcn',@myupdatefcn);
+
+% this is kind of flaky, but i don't care that much
+function txt = myupdatefcn(~,event_obj)
+	% get rid of old tips
+	alltips = findall(gcf,'Type','hggroup');
+	if numel(alltips)>2
+		delete(alltips(3:end))
+	end
+	
+	if is3D
+		pos = get(event_obj,'Position');
+		didx = get(event_obj, 'DataIndex');
+		[~,xyzinv] = sort(xyz);
+		txt = {sprintf('%s: %.4f',plotaxlabels{xyzinv(1)},pos(xyzinv(1))),...
+			   sprintf('%s: %.4f',plotaxlabels{xyzinv(2)},pos(xyzinv(2))),...
+			   sprintf('%s: %.4f',plotaxlabels{xyzinv(3)},pos(xyzinv(3))),...
+			   ['Index: ',num2str(didx')]};
+	else
+		didx = get(event_obj, 'DataIndex');
+		txt = {sprintf('%s: %.4f',plotaxlabels{1},CT(didx,1)),...
+			   sprintf('%s: %.4f',plotaxlabels{2},CT(didx,2)),...
+			   sprintf('%s: %.4f',plotaxlabels{3},CT(didx,3)),...
+			   ['Index: ',num2str(didx')]};
+	end
+end
 
 end % END MAIN SCOPE
 
@@ -184,20 +275,6 @@ function out = fromrgb(f,spc)
 	end
 end
 
-% this is kind of flaky, but i don't care that much
-function txt = myupdatefcn(~,event_obj)
-	% get rid of old tips
-	alltips = findall(gcf,'Type','hggroup');
-	if numel(alltips)>2
-		delete(alltips(3:end))
-	end
-	
-	pos = get(event_obj,'Position');
-	idx = get(event_obj, 'DataIndex');
-	txt = {['X: ',num2str(pos(1))],...
-		   ['Y: ',num2str(pos(2))],...
-		   ['Z: ',num2str(pos(3))],...
-		   ['Index: ',num2str(idx')]};
-end
+
 
 

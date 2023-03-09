@@ -45,7 +45,7 @@ padtypestrings = {'zeros','symmetric','replicate','circular'};
 padtype = 'replicate';
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	padargidx = [];
 	for k = 1:numel(varargin)
 		if ischar(varargin{k}) && strismember(lower(varargin{k}),padtypestrings)

@@ -601,8 +601,13 @@ function k = safeimshow(imtoshow,h)
 	% i'm going to be lazy and not bother making a perfect clone of that behavior
 	% just use it if it's installed
 	
-	if license('test', 'image_toolbox')
+	imshowinbase = ifversion('>=','R2014b');
+	hasIPT = hasipt();
+	
+	if imshowinbase || hasIPT
 		% IF IPT IS INSTALLED
+		d1 = warning('query','images:initSize:adjustingMag');
+		d2 = warning('query','images:imshow:magnificationMustBeFitForDockedFigure');
 		warning('off','images:initSize:adjustingMag');
 		warning('off','images:imshow:magnificationMustBeFitForDockedFigure');
 		if tight
@@ -610,8 +615,8 @@ function k = safeimshow(imtoshow,h)
 		else
 			k = imshow(imtoshow,'parent',h);
 		end
-		warning('on','images:initSize:adjustingMag');
-		warning('on','images:imshow:magnificationMustBeFitForDockedFigure');
+		warning(d1.state,'images:initSize:adjustingMag');
+		warning(d2.state,'images:imshow:magnificationMustBeFitForDockedFigure');
 	else
 		% IPT NOT INSTALLED
 		if size(imtoshow,3) == 1

@@ -106,7 +106,7 @@ end
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox') && ~strismember(mode,fbonly)
+if hasipt() && ~strismember(mode,fbonly)
 	for f = 1:size(outpict,4) % this is necessary for ordstatmulti case
 		for c = 1:s0(3)
 			switch mode

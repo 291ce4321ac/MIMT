@@ -516,7 +516,7 @@ imshow2([OP1 OP2],'invert')
 clc; clf; clear variables
 
 inpict = imread('peppers.png');
-mk = imread('sources/standardmods/redpepmask.png');
+mk = imread('sources/standardmods/pep/redpepmask.png');
 
 % F is a gaussian filter size
 F = 30;
@@ -542,7 +542,7 @@ imshow2(outpict,'invert')
 clc; clf; clearvars
 
 inpict = imread('peppers.png');
-mk = imread('sources/standardmods/redpepmask.png');
+mk = imread('sources/standardmods/pep/redpepmask.png');
 
 % mask is already antialiased, but soften it more so that it's obvious
 mk = imgaussfilt(mk,10);

@@ -44,7 +44,7 @@ function outpict = imnoiseFB(inpict,mode,varargin)
 noniptmodes = {'localvar','spatial','spatialind'};
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox') && ~strismember(mode,noniptmodes)
+if hasipt() && ~strismember(mode,noniptmodes)
 	outpict = imnoise(inpict,mode,varargin{:});
 	return;
 end

@@ -1,4 +1,4 @@
-function outpict = ibcomposite(outpict,FG,BG,FGA,BGA,FGhasalpha,BGhasalpha,compositionmode,blendmode,opacity,camount)
+function outpict = ibcomposite(outpict,FG,BG,FGA,BGA,FGhasalpha,BGhasalpha,compositionmode,blendmode,opacity,camount,nframes)
 % this is the composition section of IMBLEND  
 % this is not intended to work independently
 % i only split this because editing a 3000+ line file is a pita
@@ -161,17 +161,17 @@ if any([FGhasalpha BGhasalpha] == 1)
 					% we could use noisedither(), but that would add a teeny bit more overhead 
 					
 				case 'dissolvebn'
-					for f = 1:images
+					for f = 1:nframes
 						FGA(:,:,:,f) = noisedither(FGA(:,:,:,f)*camount,'blue')*opacity;
 					end
 					
 				case 'dissolvezf'
-					for f = 1:images
+					for f = 1:nframes
 						FGA(:,:,:,f) = zfdither(FGA(:,:,:,f)*camount)*opacity;
 					end
 					
 				case 'dissolveord'
-					for f = 1:images
+					for f = 1:nframes
 						FGA(:,:,:,f) = orddither(FGA(:,:,:,f)*camount)*opacity;
 					end
 					
@@ -180,17 +180,17 @@ if any([FGhasalpha BGhasalpha] == 1)
 					% we could use noisedither(), but that would add a teeny bit more overhead 
 					
 				case 'lindissolvebn'
-					for f = 1:images
+					for f = 1:nframes
 						FGA(:,:,:,f) = noisedither(ones(sFG(1:2))*camount,'blue').*FGA(:,:,:,f)*opacity;
 					end
 					
 				case 'lindissolvezf'
-					for f = 1:images
+					for f = 1:nframes
 						FGA(:,:,:,f) = zfdither(ones(sFG(1:2))*camount).*FGA(:,:,:,f)*opacity;
 					end
 					
 				case 'lindissolveord'
-					for f = 1:images
+					for f = 1:nframes
 						FGA(:,:,:,f) = orddither(ones(sFG(1:2))*camount).*FGA(:,:,:,f)*opacity;
 					end
 			end
@@ -258,6 +258,7 @@ else % if neither FG or BG have alpha
 			end
 			
 		case {'dissolveord','lindissolveord'}
+			disp('butt')
 			if opacity ~= 1 || camount ~= 1
 				m = orddither(ones(size(outpict(:,:,1)))*camount)*opacity;
 				outpict = bsxfun(@times,BG,1-m) + bsxfun(@times,outpict,m);

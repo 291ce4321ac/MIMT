@@ -1,4 +1,4 @@
-function outpict = imlnc(inpict,mode,varargin)
+function outpict = imlnc(inpict,varargin)
 %   IMLNC(INPICT, {MODE}, {OPTIONS})
 %       Levels & Curves tool for I or RGB images. Designed as an 
 %       extension of IMADJUST, HISTEQ, and ADJUSTHISTEQ with added features
@@ -68,25 +68,34 @@ outrange = [0 1];
 k = 1;
 g = 1;
 tol = 0.001;
+modestrings = {'independent','mean','min','max','hsl','lchab','histeqh','histeqs','ahisteqh','ahisteqs','hue','chroma','histeqrgb','ahisteqrgb'};
+mode = 'average';
 
-for vk = 1:2:length(varargin)
+vk = 1;
+while vk<=length(varargin)
     switch lower(varargin{vk})
+		case modestrings
+			mode = varargin{vk};
+			vk = vk+1;
         case {'in','inrange'}
             inrange = reshape(varargin{vk+1},2,[]);
+			vk = vk+2;
         case {'out','outrange'}
             outrange = reshape(varargin{vk+1},2,[]);
+			vk = vk+2;
         case {'k','contrast'}
             k = varargin{vk+1};
+			vk = vk+2;
         case {'g','gamma'}
             g = varargin{vk+1};
+			vk = vk+2;
 		case {'tol','tolerance'}
 			tol = varargin{vk+1};
+			vk = vk+2;
         otherwise
             error('IMLNC: unknown input parameter name %s',varargin{vk})
     end
 end
-
-if ~exist('mode','var'); mode = 'average'; end
 
 numchans = size(inpict,3);
 [inpict inclass] = imcast(inpict,'double');

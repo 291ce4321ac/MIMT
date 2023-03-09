@@ -39,7 +39,7 @@ function varargout = imcropFB(varargin)
 % See also: imcrop, cropborder
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	varargout = cell([1 nargout]);
 	[varargout{:}] = imcrop(varargin{:});
 	return;

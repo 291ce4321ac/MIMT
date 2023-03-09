@@ -24,7 +24,7 @@ function [inpict hgram] = imhistmatchFB(inpict,ref,varargin)
 
 % IF IPT IS INSTALLED
 % imhistmatch wasn't introduced until R2012b
-if license('test', 'image_toolbox') && ifversion('>=','R2012b')
+if hasipt() && ifversion('>=','R2012b')
 	[inpict hgram] = imhistmatch(inpict,ref,varargin{:});
 	return;
 end

@@ -451,7 +451,7 @@ function k = safeimshow(imtoshow,h)
 	% i'm going to be lazy and not bother making a perfect clone of that behavior
 	% just use it if it's installed
 	
-	if license('test', 'image_toolbox')
+	if hasipt()
 		% IF IPT IS INSTALLED
 		warning('off','images:initSize:adjustingMag');
 		k = imshow(imtoshow,'border','tight','parent',h);

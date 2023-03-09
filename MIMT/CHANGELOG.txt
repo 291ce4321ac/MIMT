@@ -646,8 +646,35 @@
 % FIXED
 % imrotateFB() had IPT passthrough disabled
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.52 update
 
+% FIXED
+% csview() trajectory projection was to [0 0], not [128 128] for fing ycbcr
+% imlnc() default mode handling was messed up somehow
+% ibcomposite() had a bug that broke dissolve modes for images with alpha
+% freecb() had some wrong crap in the synopsis
+% IPT checks were bypassed for some damn reason again: adapthisteqFB(), bwareafiltFB()
+% imhistFB() was using getrangefromclass(), which was IPT in older versions
+% immask() had typo that broke I/IA inputs
+% immask() no-IPT mode was disabling more of the UI options than necessary since adding later FB tools
+% isimageclass() was missing from blend/conv packages; how/when did that happen?
 
+% IMPROVED 
+% imshow2(): added version check to IPT passthrough (imshow() isn't in IPT anymore)
+% made imshow2() license/version checks persistent and added warning state preservation
+% modified replacepixels() to support BG-as-tuple for full symmetry
+% added 'tone', 'turbo', 'parula', 'parula14' to ccmap() fngr
+% added a couple of the FLIR map approximations to ccmap()
+% added 2D mode to ctpath(), improved datatip readability
+% added offset option to freecb()
+% hasipt() added to 32 files
+% quietwarning() added to 4 files
+% adding hasipt() helps avoid issues with failing to re-enable IPT passthrough after testing
+
+% ADDED 
+% hasipt()
+% quietwarning()
 
 
 

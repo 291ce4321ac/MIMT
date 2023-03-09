@@ -54,7 +54,7 @@ end
 % at least in R2019b, this toolset is split across both IPT and the base toolbox
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	switch outclass
 		case 'uint8'
 			outpict = im2uint8(inpict);

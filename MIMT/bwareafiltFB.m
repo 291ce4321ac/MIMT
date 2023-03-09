@@ -26,7 +26,7 @@ if ~islogical(inpict)
 end
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox') && false
+if hasipt()
 	outpict = bwareafiltFB(varargin{:});
 	return;
 end
@@ -107,12 +107,12 @@ else
 		segList = segList((end-numgroups+1):end);
 		% IPT tool barfs warnings, so i might as well
 		if objectsizes(end-numgroups) == objectsizes(end-numgroups+1)
-			warning('BWAREAFILTFB: ties occurred for nth place during selection')
+			quietwarning('BWAREAFILTFB: ties occurred for nth place during selection')
 		end
 	else
 		segList = segList(1:numgroups);
 		if objectsizes(numgroups) == objectsizes(numgroups+1)
-			warning('BWAREAFILTFB: ties occurred for nth place during selection')
+			quietwarning('BWAREAFILTFB: ties occurred for nth place during selection')
 		end
 	end
 	

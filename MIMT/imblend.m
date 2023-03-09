@@ -579,12 +579,13 @@ function  outpict = imblend(FG,BG,opacity,blendmode,varargin)
 %       The 'hardbomb' mode applies a random piecewise-constant mesh blend
 %       Using the 'verbose' key with these modes will display the transformation matrix as a command string.
 %       These can then be used with the mesh modes to reproduce a particular random blend.  
-%       If you want to reapeat a 'bomb' blend, but you don't have the transformation matrix, 
+%       If you want to repeat a 'bomb' blend, but you don't have the transformation matrix, 
 %       just load the script lost_bomb_recovery.m and follow the instructions.
 %		
 %       COLOR MODES: 
 %       (BEST) 'lchab/sr' > 'hslyc' > 'hsly' (FAST)
 %       'color hsxyc' modes are similar to 'color hsxy' modes, but the YPbPr transformation is chroma-limited.
+%       This further reduces distortion of saturated colors, and improves white retention in HSV/HSI.
 %       'color hsly', 'color hsvy' and 'color hsiy' are luma-corrected HS-swaps in the named models.
 %       This reduces some brightness distortion problems with highly saturated overlay colors.
 %       'color hsly', aka 'color' tends to give good results and is faster than the LCH or hslyc methods.
@@ -689,7 +690,8 @@ function  outpict = imblend(FG,BG,opacity,blendmode,varargin)
 %       mask.  This leaves linear FG alpha intact, allowing for a different range of control. i.e.:
 %           In 'dissolve', opacity is scalar (OPACITY) and density is a map (alpha*CAMOUNT)
 %           In 'lindissolve', opacity is a map (alpha*OPACITY) and density is scalar (CAMOUNT)
-%       When no FG alpha channel is present, 'dissolve' and 'lindissolve' are identical.
+%       When no FG alpha channel is present, 'dissolve' and 'lindissolve' are identical, with both
+%       opacity and density controlled by scalars (OPACITY and CAMOUNT).
 %
 %   =====================================================================
 %   EXAMPLES:
@@ -821,7 +823,7 @@ end
 
 % check frame count and expand along dim 4 as necessary
 if length(sFG) ~= 4 && length(sBG) ~= 4 % two single images
-	images = 1;
+	nframes = 1;
 else
 	if length(sFG) ~= 4 % single FG, multiple BG
 		FG = repmat(FG,[1 1 1 sBG(4)]);
@@ -830,7 +832,7 @@ else
 	elseif sFG(4) ~= sBG(4) % two unequal imagesets
 		error('IMBLEND: imagesets of unequal length')
 	end
-	images = sBG(4);
+	nframes = sBG(4);
 end
 
 % some blend modes expect RGB input; force expansion to avoid error bombing users
@@ -863,7 +865,7 @@ end
 % if using modes which themselves can generate alpha content, make sure we have alpha
 if strismember(modestring,{'nearfga','nearbga','farfga','farbga'}) && ~FGhasalpha && ~BGhasalpha
 	BGhasalpha = 1; 
-	BGA = ones([sBG(1:2) 1 images]);
+	BGA = ones([sBG(1:2) 1 nframes]);
 end
 
 % add a solid alpha channel where missing
@@ -902,13 +904,13 @@ else
 	end
 	
 	% preallocate as needed
-	if images ~= 1
+	if nframes ~= 1
 		outpict = zeros(size(BG)); 
 	end
 	
 	% process each frame
-	for f = 1:images
-		if images == 1
+	for f = 1:nframes
+		if nframes == 1
 			I = BG;
 			M = FG;
 		else
@@ -958,7 +960,7 @@ else
 			R = 1-R;
 		end		
 		
-		if images == 1
+		if nframes == 1
 			outpict = R;
 		else
 			outpict(:,:,:,f) = R;
@@ -977,7 +979,7 @@ end
 
 % handle alpha compositing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 outpict = ibcomposite(outpict,FG,BG,FGA,BGA,FGhasalpha,BGhasalpha, ...
-			compositionmode,modestring,opacity,camount);
+			compositionmode,modestring,opacity,camount,nframes);
 
 if lincomp
 	outpict = linear2rgb(outpict);

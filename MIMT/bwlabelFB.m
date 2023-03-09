@@ -45,7 +45,7 @@ if max(inpict(:)) == 0
 end
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	[labels labelcount] = bwlabel(inpict,connspec);
 else
 	[labels labelcount] = gp_bwlabel(inpict,connspec);

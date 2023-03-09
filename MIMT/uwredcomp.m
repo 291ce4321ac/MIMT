@@ -82,7 +82,7 @@ if nargin>1
 	end
 end
 
-if smoothing ~= 0 && (ifversion('<','R2014a') || ~license('test','image_toolbox'))
+if smoothing ~= 0 && (ifversion('<','R2014a') || ~hasipt())
 	error('UWREDCOMP: smoothing option requires imguidedfilter() from IPT (R2014a or newer)');
 end
 

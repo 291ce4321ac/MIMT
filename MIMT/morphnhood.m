@@ -95,7 +95,7 @@ end
 % IF IPT IS INSTALLED
 % using bwlookup to do custom cases is actually slower, and it wasn't introduced until R2012b anyway
 % endpoints mode has a bug in older versions, so just use the FB version
-if license('test', 'image_toolbox') && ~strismember(mode,{'matches','hasones','haszeros','fill8','clean4','remove8','endpoints','prune'})
+if hasipt() && ~strismember(mode,{'matches','hasones','haszeros','fill8','clean4','remove8','endpoints','prune'})
 	
 	if strcmp(mode,'fill4'); mode = 'fill'; end
 	if strcmp(mode,'clean8'); mode = 'clean'; end

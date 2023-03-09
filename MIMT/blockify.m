@@ -87,7 +87,7 @@ outpict = imcast(outpict,inclass);
     
 function outchan = resamplechan(inchan,bs)
 	% IF IPT IS INSTALLED
-	if license('test', 'image_toolbox')
+	if hasipt()
 		ctemp = imresize(inchan,round(pictsize(1:2)./bs));
         outchan = imresize(ctemp,pictsize(1:2),'nearest');
 	else 

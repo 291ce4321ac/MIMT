@@ -59,7 +59,7 @@ if max(inpict(:)) == 0;
 end
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	outpict = false(size(inpict));
 	for f = 1:size(inpict,4)
 		for c = 1:size(inpict,3)

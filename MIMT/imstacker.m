@@ -482,7 +482,7 @@ for p = 1:numpicts
 		thisar = thissize(1)/thissize(2);
 		outar = outsize(1)/outsize(2);
 		
-		% container and image have same geometry
+		% container and image have same AR
 		% THIS IS THE CASE FOR ALL EDGE CATS
 		if thisar == outar || ismember(dim,[1 2])
 			for f = 1:thissize(4)

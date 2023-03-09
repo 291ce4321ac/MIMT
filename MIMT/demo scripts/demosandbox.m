@@ -2828,26 +2828,29 @@ Am = circmean(A,2,'deg')
 %% ccmap demo
 clc; clf; clear variables
 
-A = repmat(1:200,100,1);
-
-subplot(4,1,1)
-imagesc(A)
-colormap(gca,ccmap('pastel'))
-
-subplot(4,1,2)
-imagesc(A)
-colormap(gca,ccmap('pwrap'))
-
-subplot(4,1,3)
-imagesc(A)
-colormap(gca,ccmap('nrl'))
-
 y = rand(100,6)+(1:6);
-subplot(4,1,4)
 plot(y,'linewidth',2)
 set(gca,'colororder',ccmap('hsyp',6))
 set(gca,'color','k')
 ylim([0.5 7.5])
+
+%%
+clc; clf; clear variables
+
+names = {'pastel','pwrap','nrl','tone','parula','parula14','turbo','flir1','flir2'};
+
+m = 64;
+n = 256;
+A = repmat(1:n,m,1);
+
+nf = numel(names);
+outpict = zeros(m,n,3,nf);
+for f = 1:nf
+	outpict(:,:,:,f) = ind2rgb(A,ccmap(names{f},n));
+end
+outpict = imtile(outpict,[nf 1]);
+
+imshow2(outpict,'invert')
 
 %% makect demo
 clc; clf; clear variables

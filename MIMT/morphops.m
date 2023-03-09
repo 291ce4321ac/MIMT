@@ -37,7 +37,7 @@ if isnumeric(se)
 end
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	
 	switch mode
 		case 'dilate'

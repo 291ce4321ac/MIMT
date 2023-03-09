@@ -14,7 +14,7 @@ if ~exist('tol','var')
 end
 
 % IF IPT IS INSTALLED
-if license('test', 'image_toolbox')
+if hasipt()
 	lim = stretchlim(inpict,tol);
 	return;
 end
