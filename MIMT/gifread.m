@@ -3,17 +3,23 @@ function varargout = gifread(filepath,varargin)
 %       reads all frames of an animated gif into a 4-D image array
 %
 %       DUE TO BUGS IN MATLAB, MULTIFRAME GIFS CANNOT BE CORRECTLY READ IN R2018b OR NEWER
+%       This is not a problem unique to MIMT gifread().
 %
-%       As of R2018b, changes to the imread support file readgif.m cause imread to 
+%       As of R2018b, changes to the imread() support file readgif.m cause imread to 
 %       destructively alter the content of multiframe gifs which have unique local color 
-%       tables.  This bug breaks gifread unless the 'imagemagick' option can be used.  
-%       My efforts to file a bug report on this issue appear to have either been completely 
-%       misunderstood or ignored, as it was closed without being listed or patched. 
+%       tables.  This bug breaks gifread unless the 'imagemagick' option can be used or
+%       unless you manually patch readgif.m.
+%
+%       My efforts to file a bug report on this issue appear to have either been misunderstood 
+%       or ignored, as it was closed without being publicly listed or patched. If you are using  
+%       one of these versions, read the links below, test it and file another bug report!
+% 
 %       An unreasonably detailed description of the problem can be found here:
 %       https://www.mathworks.com/matlabcentral/answers/654298-nonsensical-imread-behavior-with-multiframe-gifs-in-r2019 
 %       A simple test script is included here:
 %       https://www.mathworks.com/matlabcentral/answers/893347-is-there-a-bug-in-imread-or-imfinfo-with-multiframe-gifs-in-r2021a-b
-%       If you are using one of these versions, read the links, test it and file a bug report!
+%       See also this possible last-ditch workaround:
+%       https://www.mathworks.com/matlabcentral/answers/1902680-could-someone-help-me-to-import-individual-jpeg-images-embedded-in-a-gif-image-into-each-slide-in-a#answer_1162021
 %       
 %   FILEPATH: full path and filename
 %   OPTIONS are keys and key-value pairs as follows:
@@ -118,7 +124,7 @@ if ~indexed
 end
 
 if coalesce == 1
-    system(sprintf('convert %s -layers coalesce /dev/shm/gifreadcoalescetemp.gif',filepath));
+    system(sprintf('convert "%s" -layers coalesce /dev/shm/gifreadcoalescetemp.gif',filepath));
     filepath = '/dev/shm/gifreadcoalescetemp.gif';
 end
 
@@ -170,7 +176,7 @@ else
 	% use ispc()/isunix()/ismac() or computer() to determine os
 	% /dev/shm will only be a convenient option if isunix()
 	% though idk if that's reliably true
-    system(sprintf('convert %s /dev/shm/%%03d_gifreadtemp.gif',filepath));
+    system(sprintf('convert "%s" /dev/shm/%%03d_gifreadtemp.gif',filepath));
 	infostruct = imfinfo(filepath);
 	
 	%dummy read to get image size

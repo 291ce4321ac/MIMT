@@ -36,8 +36,8 @@ function outpict = imtweak(inpict,model,cparams,varargin)
 %       'lchok' for operations on [L C H] in polar OKLAB
 %   
 %       HuSL is an adaptation of various LCH models with normalized chroma. 
-%           It is particularly useful for tasks such as avoiding out-of-gamut 
-%           values when increasing saturation or when rotating hue at high saturation.
+%           It is particularly useful for tasks such as avoiding out-of-gamut values when increasing 
+%           saturation or when rotating hue at high saturation without cumulative chroma compression.
 %       HSY method uses polar operations in a normalized luma-chroma model
 %           this is conceptually similar to HuSL, but the simpler math makes it about 2-3x as fast.
 %       HuSLp and HSYp variants are normalized and constrained to the maximum rotationally-symmetric    
@@ -47,8 +47,6 @@ function outpict = imtweak(inpict,model,cparams,varargin)
 %           These methods are mostly useful for relative specification of uniform colors.
 %           The four models vary in the degree to which they cover the underlying RGB space:
 %           HSYp (59%), HuSLpok (58%), HuSLpuv (54%), and HuSLpab (51%)
-%       LCH and YCH operations are clamped to the extent of sRGB by chroma truncation prior to conversion.
-%           The same is done for rectangular operations in LAB, LUV, SRLAB, OKLAB, and YPbPr.
 %           
 %   CPARAMS specifies the amounts by which color channels are to be altered.  
 %       There are two supported conventions for this input:
@@ -59,6 +57,8 @@ function outpict = imtweak(inpict,model,cparams,varargin)
 %       CPARAMS=[0 1 1] results in no change to INPICT.  CPARAMS=[0.33 0.5 0.5] results in a 120 degree 
 %       hue rotation and a 50% decrease of saturation and lightness. For channels other than hue, 
 %       specifying a negative value will invert the channel and then apply the specified scaling.
+%       In terms of the full specification, this legacy specification for HSL is of the form [os1 k2 k3], 
+%       whereas the legacy specification for LAB or RGB would simply be of the form [k1 k2 k3].
 %   
 %       The full specification is a 2x3 matrix of the form [k1 k2 k3; os1 os2 os3].  The output of a given channel 
 %       is simply linear: OUT = k*IN + os;.  This allows a more straightforward manipulation of the non-hue channels.  
@@ -73,8 +73,9 @@ function outpict = imtweak(inpict,model,cparams,varargin)
 %         offset is normalized in the legacy convention.  An absolute specification allows direct manipulation, which 
 %         may be useful in adjusting hue or shifting colors in opponent models.  Unfortunately, not all models share 
 %         the same scale, so using this option requires an understanding of the scale of the color model in use.
-%       'truncatelch' (default), 'truncatergb', and 'notruncate' specify the truncation behavior
-%         used for LCH/YCH models.
+%       'truncatelch' (default), 'truncatergb', and 'notruncate' specify the truncation behavior used for 
+%         LCH/YCH models and the corresponding opponent models (LAB, LUV, etc).  When using 'truncatelch',
+%         chroma truncation is used to constrain out-of-gamut points prior to conversion back to RGB.
 %
 %
 %   CLASS SUPPORT:
@@ -200,14 +201,20 @@ switch lower(model)
 	case 'rgb'
 		outpict = zeros(sz0);
 		if legacy
-			if abs(cparams(1)) ~= 1
+			if cparams(1) ~= 1
 				outpict(:,:,1,:) = imclamp(((cparams(1) < 0)+sign(cparams(1))*inpict(:,:,1,:))*abs(cparams(1)));
+			else 
+				outpict(:,:,1,:) = inpict(:,:,1,:);
 			end
-			if abs(cparams(2)) ~= 1
+			if cparams(2) ~= 1
 				outpict(:,:,2,:) = imclamp(((cparams(2) < 0)+sign(cparams(2))*inpict(:,:,2,:))*abs(cparams(2)));
+			else 
+				outpict(:,:,2,:) = inpict(:,:,2,:);
 			end
-			if abs(cparams(3)) ~= 1
+			if cparams(3) ~= 1
 				outpict(:,:,3,:) = imclamp(((cparams(3) < 0)+sign(cparams(3))*inpict(:,:,3,:))*abs(cparams(3)));
+			else 
+				outpict(:,:,3,:) = inpict(:,:,3,:);
 			end
 		else
 			outpict(:,:,1,:) = os(1) + inpict(:,:,1)*k(1);

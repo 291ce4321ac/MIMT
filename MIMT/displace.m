@@ -9,7 +9,7 @@ function outpict = displace(inpict,amount,varargin)
 %   'xmap' indicates that the following is the displacement map for X
 %   'ymap' indicates that the following is the displacement map for Y
 %       Displacement maps may be 2-D or 3-D.
-%       If any specified map is not monochrome, displacements will be 
+%       If any specified map is not monochrome, displacements will be
 %       performed on channels independently.  (see mono() for details)
 %       Use 'mono' option to override this behavior.
 %   'edgetype' indicate that the following specifies how edges are handled
@@ -24,7 +24,7 @@ function outpict = displace(inpict,amount,varargin)
 %       Supported: 'nearest', 'linear' or 'cubic'
 %
 %   Output class is the same as input class
-%       
+%
 %   EXAMPLE:
 %   dpict=displace(inpict,[1 1]*100,'xmap',xm,'ymap',ym,'edgetype','wrap','mono');
 %
@@ -39,19 +39,19 @@ interpmethodstrings = {'nearest','linear','cubic'};
 interpmethod = 'cubic';
 
 k = 1;
-while k <= numel(varargin);
-    switch lower(varargin{k})
-        case 'xmap'
-            xmap = varargin{k+1};
+while k <= numel(varargin)
+	switch lower(varargin{k})
+		case 'xmap'
+			xmap = varargin{k+1};
 			k = k+2;
-        case 'ymap'
-            ymap = varargin{k+1};
+		case 'ymap'
+			ymap = varargin{k+1};
 			k = k+2;
-        case 'mono'
-            monoflag = 1; 
+		case 'mono'
+			monoflag = 1;
 			k = k+1;
-        case 'edgetype'
-            edgetype = varargin{k+1};
+		case 'edgetype'
+			edgetype = varargin{k+1};
 			k = k+2;
 		case 'interpolation'
 			thisarg = varargin{k+1};
@@ -61,9 +61,9 @@ while k <= numel(varargin);
 				error('DISPLACE: unknown interpolation method %s\n',thisarg)
 			end
 			k = k+2;
-        otherwise
-            error('DISPLACE: unknown input parameter name %s',varargin{k})
-    end
+		otherwise
+			error('DISPLACE: unknown input parameter name %s',varargin{k})
+	end
 end
 
 
@@ -73,131 +73,121 @@ end
 if (~(size(ymap,1) == size(inpict,1) && size(ymap,2) == size(inpict,2)) && numel(ymap) ~= 1)
 	error('DISPLACE: height and width of YMAP do not match those of INPICT')
 end
+if ~any(size(xmap,3) == [1 3])
+	error('DISPLACE: expected xmap to be an I/RGB image')
+end
+if ~any(size(ymap,3) == [1 3])
+	error('DISPLACE: expected ymap to be an I/RGB image')
+end
 
 s = size(inpict);
 nchans = size(inpict,3);
 [inpict inclass] = imcast(inpict,'double');
 
 if (ismono(xmap) && ismono(ymap)) || nchans == 1
-    monoflag = 1;
+	monoflag = 1;
 end
 
 
+xmap = imcast(xmap,'double');
+ymap = imcast(ymap,'double');
+fetchx = [];
+fetchy = []; 
 
-[X Y] = meshgrid(1:s(2),1:s(1));
-if monoflag
-	if size(xmap,3) == 3;
-        xmap = mono(xmap,'y');
+if isnumeric(edgetype)
+	[X Y] = meshgrid(0:s(2)+1,0:s(1)+1);
+	inpict = addborder(inpict,1,edgetype);
+	xmap = padarrayFB(xmap,[1 1],0,'both');
+	ymap = padarrayFB(ymap,[1 1],0,'both');
+	if nchans == 1
+		inpict = gray2rgb(inpict);
+		nchans = 3;
 	end
-	if size(ymap,3) == 3;
-        ymap = mono(ymap,'y');
-	end
-   
-    xmap = imcast(xmap,'double');
-    ymap = imcast(ymap,'double');
-        
-    if amount(1) == 0
-        fetchx = X;
-    else
-        A = amount(1)*(xmap-0.5)*2;
-        fetchx = X+A;
-    end
-
-    if amount(2) == 0
-        fetchy = Y;
-    else
-        A = amount(2)*(ymap-0.5)*2;
-        fetchy = Y+A;
-    end
-    
-    if strcmpi(edgetype,'replicate')
-        fetchx = min(max(fetchx,1),s(2));
-        fetchy = min(max(fetchy,1),s(1));
-    elseif strcmpi(edgetype,'wrap')
-        fetchx = max(mod(fetchx,s(2)),1);
-        fetchy = max(mod(fetchy,s(1)),1);
-    elseif isnumeric(edgetype)
-        inpict = addborder(inpict,1,edgetype);
-        fetchx = min(max(fetchx,0),s(2)+1)+1;
-        fetchy = min(max(fetchy,0),s(1)+1)+1;
-		fetchx = addborder(fetchx,1,1);
-		fetchy = addborder(fetchy,1,1);
-    else
-        error('DISPLACE: unknown edge handling method')
-    end
-
-    outpict = inpict;
-    for c = 1:nchans
-		outpict(:,:,c) = interp2(X,Y,inpict(:,:,c),fetchx,fetchy,interpmethod);
-    end
-    
-    if isnumeric(edgetype)
-        outpict = cropborder(outpict,1);
-    end
-    
 else
-    outpict = inpict;
-	for c = 1:3
-        if size(xmap,3) == 3;
-            xmapc = xmap(:,:,c);
-        else
-            xmapc = xmap;
-        end
-        if size(ymap,3) == 3;
-            ymapc = ymap(:,:,c);
-        else
-            ymapc = ymap;
-        end
-
-        xmapc = imcast(xmapc,'double');
-        ymapc = imcast(ymapc,'double');
-
-        if amount(1) == 0
-            fetchx = X;
-        else
-            A = amount(1)*(xmapc-0.5)*2;
-            fetchx = X+A;
-        end
-
-        if amount(2) == 0
-            fetchy = Y;
-        else
-            A = amount(2)*(ymapc-0.5)*2;
-            fetchy = Y+A;
-        end
-
-        if strcmpi(edgetype,'replicate')
-            fetchx = min(max(fetchx,1),s(2));
-            fetchy = min(max(fetchy,1),s(1));
-        elseif strcmpi(edgetype,'wrap')
-            fetchx = max(mod(fetchx,s(2)),1);
-            fetchy = max(mod(fetchy,s(1)),1);
-        elseif isnumeric(edgetype)
-            inpict = addborder(inpict,1,edgetype);
-            fetchx = min(max(fetchx,0),s(2)+1)+1;
-            fetchy = min(max(fetchy,0),s(1)+1)+1;
-			fetchx = addborder(fetchx,1,1);
-			fetchy = addborder(fetchy,1,1);
-        else
-            error('DISPLACE: unknown edge handling method')
-        end
-
-		channel = interp2(X,Y,inpict(:,:,c),fetchx,fetchy,interpmethod);
-
-        if isnumeric(edgetype)
-            outpict(:,:,c) = cropborder(channel,1);
-        else 
-            outpict(:,:,c) = channel;
-        end
-	end
-
+	[X Y] = meshgrid(1:s(2),1:s(1));
 end
 
+if monoflag
+	if size(xmap,3) == 3
+		thisxmap = mono(xmap,'y');
+	else
+		thisxmap = xmap;
+	end
+
+	if size(ymap,3) == 3
+		thisymap = mono(ymap,'y');
+	else
+		thisymap = ymap;
+	end
+	
+	scalemaps();
+	constrainfetchxy();
+	
+	outpict = inpict;
+	for c = 1:nchans
+		outpict(:,:,c) = interp2(X,Y,inpict(:,:,c),fetchx,fetchy,interpmethod);
+	end
+else
+	outpict = inpict;
+	for c = 1:nchans
+		if size(xmap,3) == 3
+			thisxmap = xmap(:,:,c);
+		else
+			thisxmap = xmap;
+		end
+	
+		if size(ymap,3) == 3
+			thisymap = ymap(:,:,c);
+		else
+			thisymap = ymap;
+		end
+		
+		scalemaps();
+		constrainfetchxy();
+		
+		outpict(:,:,c) = interp2(X,Y,inpict(:,:,c),fetchx,fetchy,interpmethod);
+	end
+end
+
+if isnumeric(edgetype)
+	outpict = cropborder(outpict,1);
+end
 outpict = imcast(outpict,inclass);
 
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function scalemaps()
+	if amount(1) == 0 % shortcut case
+		fetchx = X;
+	else
+		A = amount(1)*(thisxmap-0.5)*2;
+		fetchx = X+A;
+	end
+	
+	if amount(2) == 0 % shortcut case
+		fetchy = Y;
+	else
+		A = amount(2)*(thisymap-0.5)*2;
+		fetchy = Y+A;
+	end
+end
 
+function constrainfetchxy()
+	if strcmpi(edgetype,'replicate')
+		fetchx = imclamp(fetchx,[1 s(2)]);
+		fetchy = imclamp(fetchy,[1 s(1)]);
+	elseif strcmpi(edgetype,'wrap')
+		fetchx = max(mod(fetchx,s(2)),1);
+		fetchy = max(mod(fetchy,s(1)),1);
+	elseif isnumeric(edgetype)
+		fetchx = imclamp(fetchx,[0 s(2)+1]);
+		fetchy = imclamp(fetchy,[0 s(1)+1]);
+	else
+		error('DISPLACE: unknown edge handling method')
+	end
+end
 
+end % END MAIN SCOPE
 
 
 

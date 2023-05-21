@@ -616,7 +616,6 @@ switch modestring
 			end
 		end
 
-
 	% SIMPLE MATH OPS	
 	case 'lightenrgb'
 		% use a hard pnorm as an ease mode
@@ -1153,6 +1152,13 @@ switch modestring
 		My = imappmat(M,A(1,:,:));
 		Ipbpr = imappmat(I,A(2:3,:,:));
 		R = imappmat(cat(3,My,Ipbpr),Ai);
+		
+	case 'lumac' % swaps fg bg luma with chroma truncation
+		A = gettfm('ypbpr',rec);
+		Y = imappmat(M,A(1,:,:));
+		Rlchbr = rgb2lch(I,'ypbpr');
+		Rlchbr(:,:,1) = Y;
+		R = lch2rgb(Rlchbr,'ypbpr','truncatelch');
 
 	case 'lightness' % swaps fg bg lightness
 		Mhsl = rgb2hsl(M);

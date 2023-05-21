@@ -16,15 +16,15 @@ function outpict = morphnhood(inpict,varargin)
 %      'close'     fill small holes -- erode(dilate(inpict))
 %      'tophat'    return only the content removed by opening -- inpict & ~open(inpict) 
 %      'bothat'    return only the regions filled by closing -- ~inpict & close(inpict)
-%      'fill4'     fill isolated 0's which possess a populated 4-neighborhood (morphops() 'fill')
+%      'fill4'     fill isolated 0's which possess a populated 4-neighborhood (bwmorph() 'fill')
 %      'fill8'     fill isolated 0's which possess a populated 8-neighborhood
 %      'bridge'    fill pixels with at least 2 unconnected 8-neighbors
 %      'diag'      fill diagonally-connected pixels, breaking 8-connectivity of background
 %      'hbreak'    remove H-connected pixels
 %      'prune'     remove endpoints from a skeleton; useful for removing open branches
 %      'clean4'    remove isolated 1's which possess an empty 4-neighborhood
-%      'clean8'    remove isolated 1's which possess an empty 8-neighborhood (morphops() 'clean')
-%      'remove4'   remove isolated 1's which possess a full 4-neighborhood (morphops() 'remove')
+%      'clean8'    remove isolated 1's which possess an empty 8-neighborhood (bwmorph() 'clean')
+%      'remove4'   remove isolated 1's which possess a full 4-neighborhood (bwmorph() 'remove')
 %      'remove8'   remove isolated 1's which possess a full 8-neighborhood
 %      'shrink'    reduce objects to points
 %      'thin'      reduce objects to a skeletal line structure
@@ -58,6 +58,7 @@ function outpict = morphnhood(inpict,varargin)
 
 
 % make fill4 and fill8
+% morphnhood() does not implement the spur or thicken options
 
 numpasses = 1;
 nhood = true(3);

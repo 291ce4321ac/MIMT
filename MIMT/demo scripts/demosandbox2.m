@@ -993,34 +993,224 @@ hexc = uint2hex(CT,'celloutput')
 % use different prefix
 hexc = uint2hex(CT,'prefix','0x')
 
+%% imcropzoom() demo
+clc; clf; clearvars
+
+inpict = imread('sources/blacklight2.jpg');
+inpict = blockify(inpict,40,'rgb');
+
+% pick a salient group of blocks (e.g. the green bottle)
+% try to select those blocks exactly
+[outpict rect] = imcropzoom(inpict);
+
+imshow2(outpict)
+
+%% crop2box demo
+clc; clf; clearvars
+
+mk = imread('sources/standardmods/pep/redpepmask.png');
+
+[outmask extents] = crop2box(mk);
+
+imshow2(outmask,'invert')
+extents
+
+%% apply the same cropping to another image
+clc; clf; clearvars
+
+inpict = imread('peppers.png');
+mk = imread('sources/standardmods/pep/redpepmask.png');
+
+[outmask rows cols] = crop2box(mk);
+
+outpict = inpict(rows,cols,:);
+
+imshow2(outpict,'invert')
+
+%% puttext demo
+clc; clf; clearvars
+
+inpict = imread('peppers.png');
+thistext = sprintf('Frame %04d',123);
+
+CT = ccmap('cat',13).^0.5;
+
+params = {thistext,'bgc',[0 0]};
+outpict = puttext(inpict,params{:},'fgc',CT(1,:),'offset',[0 30],'angle',0);
+outpict = puttext(outpict,params{:},'fgc',CT(2,:),'offset',[20 20],'angle',-45);
+outpict = puttext(outpict,params{:},'fgc',CT(3,:),'offset',[30 0],'angle',-90);
+
+params = {thistext,'gravity','se','bgc',[0 1]};
+outpict = puttext(outpict,params{:},'fgc',CT(4,:),'offset',-[0 30],'angle',0);
+outpict = puttext(outpict,params{:},'fgc',CT(5,:),'offset',-[20 20],'angle',-45);
+outpict = puttext(outpict,params{:},'fgc',CT(6,:),'offset',-[30 0],'angle',-90);
+
+outpict = puttext(outpict,thistext,'gravity','w','fgc',[0 1],'bgc',CT(7,:));
+outpict = puttext(outpict,thistext,'gravity','e','fgc',[0 1],'bgc',CT(8,:));
+outpict = puttext(outpict,thistext,'gravity','n','fgc',[0 1],'bgc',CT(9,:));
+outpict = puttext(outpict,thistext,'gravity','s','fgc',[0 1],'bgc',CT(10,:));
+outpict = puttext(outpict,thistext,'gravity','ne','bgc',[0 1],'fgc',CT(11,:));
+outpict = puttext(outpict,thistext,'gravity','sw','bgc',[0 1],'fgc',CT(12,:));
+
+nt = 8;
+h = 32;
+map = 'hsyp';
+CTf = ccmap(map,nt)+0.2;
+CTb = flipud(ccmap(map,nt)-0.1);
+params = {thistext,'gravity','c','font','DSM36'};
+for k = 1:nt
+	yos = h*(1-nt)/2 + (k-1)*h;
+	outpict = puttext(outpict,params{:},'bgc',[CTb(k,:) 0.7],'fgc',CTf(k,:),'offset',[yos 0]);
+end
+
+imshow2(outpict,'invert')
+
 %% 
 clc; clf; clearvars
 
+inpict = imread('peppers.png');
+thistext = sprintf('Frame %04d',123);
+
+params = {'gravity','c','bgc',[0 0.2]};
+outpict = inpict;
+for k = 1:50
+	thistext = char(randi(double('az'),1,10));
+	thisfgc = rand(1,3);
+	os = randi([-200 200],1,2);
+	th = 90*randi([0 4],1,1);
+	outpict = puttext(outpict,thistext,params{:}, ...
+		'fgc',thisfgc,'offset',os,'angle',th);
+end
+
+imshow2(outpict,'invert')
+
+%% uniquant demo
+clc; clf; clearvars
+
+nlevels = 4;
+A = lingrad([50 200],[0 0; 0 1],[0; 255]);
+B = uniquant(A,nlevels,'default');
+C = uniquant(A,nlevels,'cdscale');
+D = uniquant(A,nlevels,'fsdither');
+E = uniquant(A,nlevels,'zfdither');
+F = uniquant(A,nlevels,'orddither');
+
+% these are index arrays, so rescale them for viewing
+outpict = double([B;C;D;E;F])/(nlevels-1);
+outpict = imresizeFB(outpict,2,'nearest'); % resize for web-view
+imshow2(outpict,'invert')
+
+%% normalize to different limits
+clc; clf; clearvars
+
+A = imread('sources/bananas.jpg');
+A = mono(A,'y');
+A = imadjustFB(A,[0 1],[0 0.5]); % data only spans [0 113]
+
+nlevels = 16;
+mode = 'default';
+B = uniquant(A,nlevels,mode); % normalize WRT data extrema [0 113]
+C = uniquant(A,nlevels,[0 255],mode); % normalize WRT [0 255]
+
+% these are index arrays, so rescale them for viewing
+outpict = double([B;C])/(nlevels-1);
+imshow2(outpict,'invert')
+
+%% gray2pcolor demo
+clc; clf; clearvars
+
+CT = ccmap('tone',8);
+A = lingrad([50 200],[0 0; 0 1],[0; 255]);
+B = gray2pcolor(A,CT,'default');
+C = gray2pcolor(A,CT,'cdscale');
+D = gray2pcolor(A,CT,'fsdither');
+E = gray2pcolor(A,CT,'zfdither');
+F = gray2pcolor(A,CT,'orddither');
+
+outpict = [B;C;D;E;F];
+outpict = imresizeFB(outpict,2,'nearest'); % resize for web-view
+imshow2(outpict,'invert')
+
+%% gbcam demo
+clc; clf; clearvars
+
+inpictrgb = imread('sources/table.jpg');
+inpict = mono(inpictrgb,'y');
+inpict = imlnc(inpict,'k',1.2);
+
+scale = 2;
+A = gbcam(inpict,'newschool',scale);
+B = gbcam(inpict,'oldschool',scale);
+C = gbcam(inpict,'gray',scale);
+D = gbcam(inpict,'brigray',scale);
+E = gbcam(inpict,'unigray',scale);
+
+outpict = [A B; C D; E E*0];
+imshow2(outpict,'invert')
+
+%% im2ct demo
+clc; clf; clearvars
+
+ref = imread('sources/blacklight2.jpg');
+
+% a simple full-range sweep with few breakpoints
+CT1 = im2ct(ref,'ncolors',256,'nbreaks',4,'uniform',true, ... 
+			'cspace','ypbpr','fullrange',true,'minsat',0.2);
+% with native L/Y, slope will be variable, leading to banding
+CT2 = im2ct(ref,'ncolors',256,'nbreaks',4,'uniform',false, ...
+			'cspace','ypbpr','fullrange',true,'minsat',0.2);
+% use LAB instead
+CT3 = im2ct(ref,'ncolors',256,'nbreaks',4,'uniform',true, ...
+			'cspace','lab','fullrange',true,'minsat',0.2);
+% too many breakpoints to appear smooth
+CT4 = im2ct(ref,'ncolors',256,'nbreaks',8,'uniform',true, ...
+			'cspace','lab','fullrange',true,'minsat',0.2);
+% don't sweep all the way to black/white
+CT5 = im2ct(ref,'ncolors',256,'nbreaks',4,'uniform',true, ...
+			'cspace','lab','fullrange',false,'minsat',0.2);
+% specify a different number of output colors
+CT6 = im2ct(ref,'ncolors',16,'nbreaks',4,'uniform',true, ...
+			'cspace','lab','fullrange',true,'minsat',0.2);
+
+% build an output image
+A = lingrad([50 200],[0 0; 0 1],[0; 255]);
+B = gray2pcolor(A,CT1);
+C = gray2pcolor(A,CT2);
+D = gray2pcolor(A,CT3);
+E = gray2pcolor(A,CT4);
+F = gray2pcolor(A,CT5);
+G = gray2pcolor(A,CT6);
+outpict = [B;C;D;E;F;G];
+
+imshow2(outpict,'invert')
+
+%% use im2ct() for simple image recoloring
+clc; clf; clearvars
+
+ref = imread('sources/blacklight2.jpg');
+inpict = imread('sources/table.jpg');
+
+CT = im2ct(ref,'ncolors',256,'nbreaks',4,'uniform',true, ...
+			'cspace','ypbpr','fullrange',true,'minsat',0.2);
+outpict = gray2pcolor(inpict,CT,imclassrange(class(inpict)),'default');
+
+% perhaps enforce Y if you want (if using 'lab' or 'fullrange',false)
+%outpict = imblend(inpict,outpict,1,'lumac');
+
+% display
+subplot(8,1,1)
+image(rot90(ctflop(1-CT)))
+subplot(8,1,2:8)
+imshow2(outpict,'invert')
 
 %% 
 clc; clf; clearvars
 
-
 %% 
 clc; clf; clearvars
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+%% 
+clc; clf; clearvars
 
 
 

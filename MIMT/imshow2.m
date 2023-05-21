@@ -707,8 +707,7 @@ function updatefig()
 	if tools == 1
 		hf = handles.imshow2figure;
 	else 
-		% hf = ha.Parent;
-		hf = get(ha,'Parent'); % for legacy compatibility
+		hf = get(ha,'Parent');
 	end
 	
 	set(hf,'resizefcn',@onresize)

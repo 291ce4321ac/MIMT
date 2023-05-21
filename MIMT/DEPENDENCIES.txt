@@ -3,6 +3,7 @@ The following files require Image Processing Toolbox to work
 
 COMPLETE IPT DEPENDENCY:
 vectorscan		(uses fspecial) (this usage is preserved for reference)
+imcropzoom		(uses imcrop(), imcropRect(), and imshow())
 
 PARTIAL IPT DEPENDENCY:
 immask 			(geometric selection tools only)
@@ -52,6 +53,7 @@ depending on your needs. For example:
 
 edgemap			see imgradient, edge
 replacepixels	see imoverlay
+uniquant		see gray2ind
 fkgen			see fspecial
 tonemap			see tonemap
 mono			see rgb2gray, im2gray, rgb2lightness
@@ -60,6 +62,7 @@ imcheckerboard	see checkerboard
 pickblobs		see bwselect
 splitchans		see imsplit
 iminv			see imcomplement
+imclassrange	see getrangefromclass
 colordiff		see deltaE, imcolordiff
 roifilter		see roifilt2
 flattenbg		see imflatfield
@@ -75,7 +78,7 @@ Some files may still require other resources:
 
 picdynamics requires LTI simulation tools which may be found in various toolboxes
 gifread/gifwrite requires imagemagick for certain options
-imrectify requires R2013b or newer in order to use the table class (only when using 'showgui',false)
+imrectify needs R2013b or newer in order to use the table class (only when using 'showgui',false)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Some files have FEX dependencies:

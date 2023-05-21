@@ -1,6 +1,6 @@
 function gifwrite(varargin)
-%   GIFWRITE(INARRAY, {DISPOSALMETHOD}, FILEPATH, {DELAY}, {WRITEMETHOD})
-%   GIFWRITE(INARRAY, MAP, {TRANSPARENTIDX}, {DISPOSALMETHOD}, FILEPATH, {DELAY}, {WRITEMETHOD})
+%   GIFWRITE(INARRAY, {DISPOSALMETHOD}, FILEPATH, {DELAY}, {WRITEMETHOD}, {LOOPCOUNT}, {DITHER})
+%   GIFWRITE(INARRAY, MAP, {TRANSPARENTIDX}, {DISPOSALMETHOD}, FILEPATH, {DELAY}, {WRITEMETHOD}, {LOOPCOUNT})
 %       Write image stack to an animated gif 
 %       
 %   INARRAY: 4-D image array
@@ -33,20 +33,30 @@ function gifwrite(varargin)
 %       may be a scalar or a vector of length = numframes
 %
 %   FILEPATH: full name and path of output animation
+% 
 %   WRITEMETHOD: animation method, 'native' or 'imagemagick' (default 'native')
 %       'imagemagick' is for niche use, and is slower and does not support all inputs
 %
+%   LOOPCOUNT: optionally specifies how many times an animation should be played
+%       (default Inf).  This has no effect when using 'imagemagick' option.
+%
+%   DITHER: optionally specifies how an RGB input should be quantized.  Valid keys 
+%       are 'dither' (default) and 'nodither'.  This has no effect when using
+%       the 'imagemagick' option.
+% 
 %   NOTE:
 %       This is intended for simple, relatively nonoptimized images.
 %       Specification of frame offset, background color, etc are not supported.
 %      'imagemagick' option requires external tools and assumes a *nix environment.
 %
 %   EXAMPLES:
-%       Write a simple rgb image stack 
+%       Write a simple RGB image stack 
 %          gifwrite(rgbpict,'giftest.gif')
 %       Read an animation with transparency and write it again with a different frame delay
 %          [inpict map tcidx]=gifread('advtime.gif','indexed','tcidx','imagemagick');
 %          gifwrite(inpict,map,tcidx,'restorebg','giftest.gif',0.10)
+%       Write an RGB image stack using finite loopcount and no dithering
+%          gifwrite(rgbpict,'giftest.gif','loopcount',4,'nodither')
 %
 % Webdocs: http://mimtdocs.rf.gd/manual/html/gifwrite.html
 % See also: gifread imread imwrite imfinfo
@@ -56,21 +66,30 @@ delay = 0.05;
 method = 'native';
 tcidx = NaN;
 disposalmethod = 'donotspecify';
+loopcount = Inf;
+ditherstr = 'dither';
 
 % this is all convoluted because i'm trying to not break compatibility with prior versions which used strictly ordered parameters
 % this allows for extra keys or key-value pairs to be handled in the future
-validkeys = {'native' 'imagemagick' 'leaveinplace' 'restorebg' 'restoreprevious' 'donotspecify'};
 dispmethkeys = {'leaveinplace' 'restorebg' 'restoreprevious' 'donotspecify'};
+validkeys = [{'native' 'imagemagick' 'loopcount' 'dither' 'nodither'} dispmethkeys];
 vkindex = [];
 for k = 1:nargin
-	if ischar(varargin{k}) || iscellstr(varargin{k})
-		if all(ismember(lower(varargin{k}),validkeys))
-			if all(ismember(lower(varargin{k}),dispmethkeys))
-				disposalmethod = varargin{k};
+	thisarg = varargin{k};
+	if ischar(thisarg) || iscellstr(thisarg) %#ok<ISCLSTR>
+		if all(ismember(lower(thisarg),validkeys))
+			if all(ismember(lower(thisarg),dispmethkeys))
+				disposalmethod = thisarg;
+				vkindex = [vkindex k]; %#ok<*AGROW>
+			elseif ismember(lower(thisarg),{'native' 'imagemagick'})
+				method = thisarg;
 				vkindex = [vkindex k];
-			elseif ismember(lower(varargin{k}),{'native' 'imagemagick'})
-				method = varargin{k}
+			elseif ismember(lower(thisarg),{'dither' 'nodither'})
+				ditherstr = thisarg;
 				vkindex = [vkindex k];
+			elseif strcmpi(thisarg,'loopcount')
+				loopcount = varargin{k+1};
+				vkindex = [vkindex k k+1];
 			end
 		end
 	end
@@ -79,6 +98,7 @@ end
 varargin = varargin(~ismember(1:nargin,vkindex));
 narginmod = numel(varargin);
 
+% process legacy inputs
 if isnumeric(varargin{2})
 	indexed = 1;
 	inarray = varargin{1};
@@ -202,13 +222,13 @@ end
 % if C, transparencyidx has been expanded
 % disposalmethod has been expanded
 
-if strcmpi(method,'native');
+if strcmpi(method,'native')
     disp('creating animation')
 	tcidxthisframe = 0;
 	
 	if indexed
 		% INDEXED INPUTS
-		for f = 1:numframes;
+		for f = 1:numframes
 			tfhastc = 0;
 			imind = uint8(inarray(:,:,:,f));
 			cm = inmap(:,:,:,f);
@@ -247,10 +267,10 @@ if strcmpi(method,'native');
 		end
 	else
 		% RGB INPUTS
-		for f = 1:numframes;			
+		for f = 1:numframes		
 			if hasalpha
 				tfhastc = 1;
-				[imind,cm] = rgb2ind(inarray(:,:,:,f),255);
+				[imind,cm] = rgb2ind(inarray(:,:,:,f),255,ditherstr);
 				numcolorsthisframe = size(cm,1);
 				
 				% append dummy row to color table & set tcidx
@@ -261,7 +281,7 @@ if strcmpi(method,'native');
 				imind(~alphamap(:,:,:,f)) = tcidxthisframe;
 			else
 				tfhastc = 0;
-				[imind,cm] = rgb2ind(inarray(:,:,:,f),256);
+				[imind,cm] = rgb2ind(inarray(:,:,:,f),256,ditherstr);
 			end
 			
 			writeaframe();
@@ -270,12 +290,12 @@ if strcmpi(method,'native');
 else
 	% USE EXTERNAL METHOD
     disp('creating frames')    
-    for f = 1:numframes;
+    for f = 1:numframes
         imwrite(inarray(:,:,:,f),sprintf('/dev/shm/%03dgifwritetemp.png',f),'png');
     end
     
     disp('creating animation')
-    system(sprintf('convert -delay %d -loop 0 /dev/shm/*gifwritetemp.png %s',delay*100,filepath));
+    system(sprintf('convert -delay %d -loop 0 /dev/shm/*gifwritetemp.png "%s"',delay*100,filepath));
     
     disp('cleaning up')    
     system('rm /dev/shm/*gifwritetemp.png');
@@ -284,14 +304,14 @@ end
 
 function writeaframe()
 	if tfhastc
-		if f == 1;
-			imwrite(imind,cm,filepath,'gif','DelayTime',delay(f),'Loopcount',inf,'TransparentColor',tcidxthisframe,'DisposalMethod',disposalmethod{f});
+		if f == 1
+			imwrite(imind,cm,filepath,'gif','DelayTime',delay(f),'Loopcount',loopcount,'TransparentColor',tcidxthisframe,'DisposalMethod',disposalmethod{f});
 		else
 			imwrite(imind,cm,filepath,'gif','DelayTime',delay(f),'WriteMode','append','TransparentColor',tcidxthisframe,'DisposalMethod',disposalmethod{f});
 		end
 	else
-		if f == 1;
-			imwrite(imind,cm,filepath,'gif','DelayTime',delay(f),'Loopcount',inf,'DisposalMethod',disposalmethod{f});
+		if f == 1
+			imwrite(imind,cm,filepath,'gif','DelayTime',delay(f),'Loopcount',loopcount,'DisposalMethod',disposalmethod{f});
 		else
 			imwrite(imind,cm,filepath,'gif','DelayTime',delay(f),'WriteMode','append','DisposalMethod',disposalmethod{f});
 		end

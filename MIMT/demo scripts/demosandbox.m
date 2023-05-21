@@ -1289,7 +1289,7 @@ xmap = mono(xmap,'y');
 ymap = mono(ymap,'y');
 
 dpict = displace(inpict,[1 1]*100,'xmap',xmap,'ymap',ymap,'edgetype','wrap');
-%dpict=displace(inpict,[1 1]*100,'xmap',xmap,'ymap',ymap,'edgetype',[32 64 128]);
+%dpict=displace(inpict,[1 1]*100,'xmap',xmap,'ymap',ymap,'edgetype',[0 1 0]);
 
 imshow2(dpict,'invert')
 %imwrite(xmap,'examples/displaceex1.jpg','jpeg','Quality',90);
@@ -2837,7 +2837,7 @@ ylim([0.5 7.5])
 %%
 clc; clf; clear variables
 
-names = {'pastel','pwrap','nrl','tone','parula','parula14','turbo','flir1','flir2'};
+names = {'pastel','pwrap','nrl','tone','parula','parula14','turbo','flir1','flir2','dias1'};
 
 m = 64;
 n = 256;
@@ -2845,6 +2845,23 @@ A = repmat(1:n,m,1);
 
 nf = numel(names);
 outpict = zeros(m,n,3,nf);
+for f = 1:nf
+	outpict(:,:,:,f) = ind2rgb(A,ccmap(names{f},n));
+end
+outpict = imtile(outpict,[nf 1]);
+
+imshow2(outpict,'invert')
+
+%%
+clc; clf; clear variables
+
+names = {'cat','althi','altlo'};
+
+n = 16;
+A = imresize(1:n,[64 floor(256/n)*n],'nearest');
+
+nf = numel(names);
+outpict = zeros([imsize(A,2),3,nf]);
 for f = 1:nf
 	outpict(:,:,:,f) = ind2rgb(A,ccmap(names{f},n));
 end

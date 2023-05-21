@@ -3,22 +3,32 @@ function cset = ccmap(varargin)
 %   Custom colormap generator originally for MIMT docs processing
 %
 %  MAPNAME is one of the following:
-%    'pastel' is a soft yellow-magenta-teal CT used for imblend() contour maps
-%    'nrl' is an asymmetric cyan-blue-black CT used for imblend() NRL maps
+%    MIMT maps:
+%    'pastel' is a soft yellow-magenta-teal CT used for imblend() contour maps (linear luma)
+%    'pwrap' is a closed version of 'pastel' (asymmetric piecewise-linear luma)
+%    'nrl' is an asymmetric cyan-blue-black CT used for imblend() NRL maps (PWL luma)
 %    'tone' is a linear-luma sweep through black-purple-tan-white, like a pastel version of MPL 'magma'
-%    'hsyp' is a circular hue sweep in HSYp, used to make short 'ColorOrder' CTs (constant luma)
-%    'pwrap' is a closed version of 'pastel'
+%    'cat' is an interleaved hue sweep in HuSLpok with low-contrast alternating L (categorical)
+%    'althi' is a hue sweep in HuSLpok with high-contrast alternating L (categorical)
+%    'altlo' is a hue sweep in HuSLpok with low-contrast alternating L (categorical)
+%    'hsyp' is a constant-luma hue sweep in HSYp (quasi-categorical)
+% 
+%    MATLAB compatibility maps:
 %    'parula' is a clone of the R2017b version of 'parula', for use in prior versions
 %    'parula14' is a clone of the R2014b-R2017a version of 'parula'
 %    'turbo' is a clone of the turbo() map introduced in R2020b
+%    'sky' is a clone of the sky() map introduced in R2023a
+%
+%    Thermocamera maps:
 %    'flir1' is a clone of the black-purple-yellow-white map used in some FLIR cameras
 %    'flir2' is a clone of one of the rainbow maps used in some FLIR cameras
+%    'dias1' is a clone of the rainbow map used by some DIAS cameras
 % 
 % See also: makect, ctpath
 
-% imshow(repmat(ctflop(ccmap('pastel',64)),[1 64 1]))
-
-mapnamestrings = {'pastel','nrl','hsyp','pwrap','tone','parula','parula14','turbo','flir1','flir2'};
+mapnamestrings = {'pastel','nrl','hsyp','pwrap','tone','althi','altlo','cat', ...
+					'parula','parula14','turbo','sky', ...
+					'flir1','flir2','dias1'};
 mapname = 'pastel';
 steps = 64;
 
@@ -40,6 +50,21 @@ if numel(varargin) > 0
 end
 
 switch mapname
+	case 'dias1'
+		% similar to the FLIR maps, this was based on available example images, 
+		% but the fitting was done in sRGB instead of LAB
+		CT0 = [0.301 0 0.458; 0.282 0 0.467; 0.264 0 0.481; 0.246 0 0.499; 0.228 0 0.523; 0.21 0 0.549; 0.192 0 0.578; 0.174 0.000264 0.608; 
+			0.142 0.0679 0.655; 0.112 0.136 0.72; 0.0867 0.196 0.782; 0.0646 0.232 0.815; 0.0443 0.268 0.844; 0.0253 0.303 0.872; 0.00711 0.339 0.898; 
+			0 0.375 0.921; 0 0.41 0.942; 0 0.46 0.959; 0 0.527 0.966; 0 0.581 0.953; 0 0.629 0.925; 0 0.672 0.891; 0 0.712 0.846; 0 0.75 0.796; 
+			0 0.787 0.738; 0 0.822 0.667; 0 0.837 0.577; 0 0.782 0.441; 0 0.738 0.206; 0 0.734 0.0101; 0 0.75 0; 0 0.767 0; 0.0148 0.784 0; 
+			0.104 0.802 0; 0.209 0.82 0; 0.325 0.838 0; 0.44 0.856 0; 0.542 0.875 0; 0.628 0.894 0; 0.699 0.913 0; 0.757 0.934 0; 0.807 0.955 0; 
+			0.85 0.978 0; 0.886 0.979 0; 0.918 0.901 0; 0.946 0.809 0; 0.97 0.707 0; 0.992 0.597 0; 1 0.482 0; 1 0.364 0; 1 0.284 0; 1 0.209 0; 
+			1 0.135 0; 1 0.0601 0; 1 0 0.0309; 0.992 0 0.114; 0.977 0 0.189; 0.96 0.0841 0.289; 0.949 0.207 0.368; 0.94 0.29 0.421; 0.932 0.373 0.474; 
+			0.925 0.456 0.527; 0.919 0.539 0.58; 0.914 0.622 0.633];
+		x0 = 1:64;
+		xf = linspace(1,64,steps);
+		cset = interp1(x0,CT0,xf,'pchip');
+		
 	case 'flir1'
 		% using a handful of exported FLIR images, the colorbars were cropped and averaged off-axis
 		% samples were interpolated onto a common basis, and then a spline manually fit to them in LAB
@@ -77,6 +102,15 @@ switch mapname
 		cset = interp1(x0,CT0,xf,'linear');
 		cset = ctflop(hsy2rgb(ctflop(cset),'pastel'));
 		
+	case 'sky'
+		% the blue color is derived from the defaultaxescolororder 
+		% i.e. lines(1) in newer versions
+		% but defaultaxescolororder is different in older versions
+		% so it's going to be a literal here for sake of compatibility
+		CT0 = [0 0.4470 0.7410;
+			0.9000 0.9447 0.9741];
+		cset = makect(CT0(2,:),CT0(1,:),steps);
+		
 	case 'parula'
 		x0 = [0 0.0549 0.09804 0.1333 0.2 0.2667 0.3333 0.4 0.4431 0.5059 0.6 0.6667 0.7333 0.7686 0.8 0.8235 0.8392 0.8667 0.9333 1];
 		CT0 = [27.48 80.54 305.6; 34.53 93.25 304.2; 39.58 97.05 302.6; 43.28 95.58 300.7; 49.47 87.18 295.8; ...
@@ -106,6 +140,32 @@ switch mapname
 		xf = linspace(0,1,steps);
 		cset = interp1(x0,CT0,xf,'pchip');
 		cset = ctflop(lch2rgb(lab2lch(ctflop(cset)),'oklab'));
+		
+	case 'cat'
+		lhw = 0.05;
+		lcenter = 0.6;
+		n = 4;
+		H = linspace(0,360*(steps-1)/n,steps+1);
+		H = H(1:end-1);
+		H = mod(H,360);
+		S = ones(size(H));
+		L = zeros(size(H)) + (lcenter - lhw);
+		L(1:2:end) = L(1:2:end) + 2*lhw;
+		cset = permute(husl2rgb(cat(3,H,100*S,100*L),'oklab'),[2 3 1]);
+		
+	case {'althi','altlo'}
+		if strcmpi(mapname,'althi')
+			lhw = 0.09;
+		else
+			lhw = 0.04;
+		end
+		lcenter = 0.6;
+		H = linspace(0,360,steps+1);
+		S = ones(size(H));
+		L = zeros(size(H)) + (lcenter - lhw);
+		L(1:2:end) = L(1:2:end) + 2*lhw;
+		cset = permute(husl2rgb(cat(3,H,100*S,100*L),'oklab'),[2 3 1]);
+		cset = cset(1:end-1,:);
 		
 	case 'nrl'
 		eh = [0 180];

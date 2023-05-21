@@ -3,13 +3,14 @@ function cdiff = colordiff(Argb,Brgb,varargin)
 %    Calculate the Delta-E color difference between two images.
 %
 %  A and B may be RGB images or Mx3 color tables of any standard
-%    image class.  Both inputs must be the same size.
+%    image class.  Both inputs must be the same size. 
 %
 %  CSPACE optionally specifies the colorspace (default 'lab')
 %    Keys include 'lab', 'srlab', 'oklab', 'luv', and 'ypbpr'.
 %  DETYPE optionally specifies the calculation type (default 'de76')
 %    'de76' calculates Delta E (1976) (simple Euclidean distance)
 %    'de94' calculates Delta E (1994) (weighted distance in LCH)
+%    For 'de94', image A is the reference image.
 %
 %  Note:
 %    I'm including extra colorspace options for completeness.  I make no 

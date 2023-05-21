@@ -14,7 +14,9 @@ function outpict = imrecolor(ref,inpict,varargin)
 %   OPTIONS include the key-value pairs:
 %   'colormodel' specifies the color model to use.  Values include;
 %      'hsly' for luma-corrected HSL (fast & good) (default)
+%      'hsvy' for luma-corrected HSV (fast & good)
 %      'hsl' for standard HSL (fast)
+%      'hsv' for standard HSV (fast)
 %      'hsy' or 'hsyp' for the corresponding HSY variant (fast)
 %      'lch' for LCHuv (slow & good)
 %      'husl' for HuSLuv (slowest, poor)
@@ -36,9 +38,10 @@ function outpict = imrecolor(ref,inpict,varargin)
 %
 % Webdocs: http://mimtdocs.rf.gd/manual/html/imrecolor.html
 
+% hsly/hsvy modes are chroma-limited, like the imblend hslyc/hslyc color modes
 
 % defaults
-cmstrings = {'lch','husl','hsl','hsly','rgb','rgby','hsy','hsyp'};
+cmstrings = {'lch','husl','hsl','hsly','hsv','hsvy','rgb','rgby','hsy','hsyp'};
 colormodel = 'hsly';
 blursize = 10;
 numybins = 16;
@@ -215,7 +218,6 @@ switch colormodel
 	case 'hsly'
 		M = rgb2hsl(ref); I = rgb2hsl(inpict);
 		A = gettfm('ypbpr');
-		Ai = gettfm('ypbpr_inv');
 		Iy = imappmat(inpict,A(1,:,:));
 		switch channels
 			case {'hs','color'}
@@ -234,8 +236,54 @@ switch colormodel
 			otherwise
 				error('IMRECOLOR: unknown or unsupported channel substring %s for HSL+Y mode',channels)
 		end	
-		Rypp = cat(3,Iy,imappmat(R,A(2:3,:,:)));
-		R = imappmat(Rypp,Ai);
+		Rlchbr = rgb2lch(R,'ypbpr');
+		Rlchbr(:,:,1) = Iy;
+		R = lch2rgb(Rlchbr,'ypbpr','truncatelch');
+	
+	case 'hsv'
+		M = rgb2hsv(ref); I = rgb2hsv(inpict);
+		switch channels
+			case {'hs','color'}
+				MH = M(:,:,1); IH = I(:,:,1);
+				MH(isnan(MH)) = 0; IH(isnan(IH)) = 0;
+				[IH,IC] = matchhistograms(numybins,numcbins,M(:,:,3)*100,I(:,:,3)*100,MH,IH,M(:,:,2),I(:,:,2));
+				R = hsv2rgb(cat(3,IH,IC,I(:,:,3)));
+			case 'h'
+				MH = M(:,:,1); IH = I(:,:,1);
+				MH(isnan(MH)) = 0; IH(isnan(IH)) = 0;
+				IH = matchhistograms(numybins,numcbins,M(:,:,3)*100,I(:,:,3)*100,MH,IH);
+				R = hsv2rgb(cat(3,IH,I(:,:,2),I(:,:,3)));
+			case {'s','c'}
+				IC = matchhistograms(numybins,numcbins,M(:,:,3)*100,I(:,:,3)*100,M(:,:,2),I(:,:,2));
+				R = hsv2rgb(cat(3,I(:,:,1),IC,I(:,:,3)));
+			otherwise
+				error('IMRECOLOR: unknown or unsupported channel substring %s for HSV mode',channels)
+		end	
+		
+	case 'hsvy'
+		M = rgb2hsv(ref); I = rgb2hsv(inpict);
+		A = gettfm('ypbpr');
+		Iy = imappmat(inpict,A(1,:,:));
+		switch channels
+			case {'hs','color'}
+				MH = M(:,:,1); IH = I(:,:,1);
+				MH(isnan(MH)) = 0; IH(isnan(IH)) = 0;
+				[IH,IC] = matchhistograms(numybins,numcbins,M(:,:,3)*100,I(:,:,3)*100,MH,IH,M(:,:,2),I(:,:,2));
+				R = hsv2rgb(cat(3,IH,IC,I(:,:,3)));
+			case 'h'
+				MH = M(:,:,1); IH = I(:,:,1);
+				MH(isnan(MH)) = 0; IH(isnan(IH)) = 0;
+				IH = matchhistograms(numybins,numcbins,M(:,:,3)*100,I(:,:,3)*100,MH,IH);
+				R = hsv2rgb(cat(3,IH,I(:,:,2),I(:,:,3)));
+			case {'s','c'}
+				IC = matchhistograms(numybins,numcbins,M(:,:,3)*100,I(:,:,3)*100,M(:,:,2),I(:,:,2));
+				R = hsv2rgb(cat(3,I(:,:,1),IC,I(:,:,3)));
+			otherwise
+				error('IMRECOLOR: unknown or unsupported channel substring %s for HSV+Y mode',channels)
+		end	
+		Rlchbr = rgb2lch(R,'ypbpr');
+		Rlchbr(:,:,1) = Iy;
+		R = lch2rgb(Rlchbr,'ypbpr','truncatelch');
 		
 
 	otherwise

@@ -210,6 +210,7 @@ function  outpict = imblend(FG,BG,opacity,blendmode,varargin)
 %       saturation      (C in CIELCHab)
 %       value           (max(R,G,B))
 %       luma            (Rec601 or {Rec709})
+%       lumac           (same as 'luma',but chroma-limited)
 %       lightness       (mean(min(R,G,B),max(R,G,B)))
 %       intensity       (mean(R,G,B))
 %       transfer inchan>outchan   (directly transfer any channel to another)
@@ -583,7 +584,7 @@ function  outpict = imblend(FG,BG,opacity,blendmode,varargin)
 %       just load the script lost_bomb_recovery.m and follow the instructions.
 %		
 %       COLOR MODES: 
-%       (BEST) 'lchab/sr' > 'hslyc' > 'hsly' (FAST)
+%       General recommendation is (BEST) 'lchab/sr' > 'hslyc' > 'hsly' (FAST)
 %       'color hsxyc' modes are similar to 'color hsxy' modes, but the YPbPr transformation is chroma-limited.
 %       This further reduces distortion of saturated colors, and improves white retention in HSV/HSI.
 %       'color hsly', 'color hsvy' and 'color hsiy' are luma-corrected HS-swaps in the named models.
@@ -592,7 +593,7 @@ function  outpict = imblend(FG,BG,opacity,blendmode,varargin)
 %       'color hsl' matches the legacy 'color' blend mode in GIMP
 %       Uncorrected HSL/HSV/HSI modes are included only for sake of demonstration.
 %       'color hsyp' attempts to provide good uniformity, at the cost of maximum chroma range.
-%       'color lchsr' best approximates Photoshop behavior.
+%       'color lchab' best approximates Photoshop behavior.
 %       'color lchsr' is similar to the LCHab method, but with less blue-purple hue shift.
 %
 %       The 'hue' & 'saturation' modes are derived from LCHab instead of HSL as in GIMP.
@@ -836,9 +837,12 @@ else
 end
 
 % some blend modes expect RGB input; force expansion to avoid error bombing users
+componentmodes = {'value','lightness','intensity','hue','saturation','luma','lumac', ...
+	'color','colorlchab','colorlchsr','colorhsyp','colorhsl','colorhsv','colorhsi', ...
+	'colorhsly','colorhsvy','colorhsiy','colorhslyc','colorhsvyc','colorhsiyc'};
+comprelational = {'lighteny','darkeny','saturate','desaturate','mostsat','leastsat'};
 modestring = lower(blendmode(blendmode ~= ' '));
-mustRGB = strismember(modestring,{'value','lightness','intensity','hue','saturation','luma','lighteny', ...
-	'darkeny','color','colorlchab','colorlchsr','colorhsl','colorhsyp','saturate','desaturate','mostsat','leastsat'}) ...
+mustRGB = strismember(modestring,[componentmodes comprelational]) ...
 	|| ~isempty([strmatch('transfer',modestring) strmatch('permute',modestring) strmatch('recolor',modestring)]) ...
 	|| ~strcmp(colormodel,'rgb');
 

@@ -22,12 +22,14 @@ function outpict = imnoiseFB(inpict,mode,varargin)
 %     IMNOISEFB(INPICT,'speckle',{VARIANCE})
 %        Adds intensity-scaled zero-mean uniform noise of specified VARIANCE (default 0.05)
 %     IMNOISEFB(INPICT,'salt & pepper',{DENSITY})
-%        randomly slam pixels to range extrema according to a DENSITY parameter (default 0.05)
+%        Randomly slam pixels to range extrema according to a DENSITY parameter (default 0.05)
 %     IMNOISEFB(INPICT,'poisson')
 %        Adds poisson noise based on the input image class and pixel values.  For integer classes, noise 
 %        generated for a given pixel is derived from a poisson distribution with a mean equal to the 
 %        original pixel value.  For floating point classes, the distribution is upscaled by 1E6 for 'single' 
-%        and 1E12 for 'double.    
+%        and 1E12 for 'double.  
+%     IMNOISEFB(INPICT,'rice',{SIGMA})
+%        Additive Rician noise of the specified scale parameter SIGMA (default 0.05).
 %     IMNOISEFB(INPICT,'spatial',{VARIANCE})
 %        Displaces pixels by a random vector.  Displacement magnitude is zero-mean gaussian noise with 
 %        VARIANCE specified per axis (or as scalar with implicit expansion) (default [1 1]).  This is similar
@@ -41,7 +43,7 @@ function outpict = imnoiseFB(inpict,mode,varargin)
 % See also: imnoise, rand, randn, perlin, perlin3
 
 % localvar won't passthrough due to map expansion feature
-noniptmodes = {'localvar','spatial','spatialind'};
+noniptmodes = {'localvar','spatial','spatialind','rice','rician','ricean'};
 
 % IF IPT IS INSTALLED
 if hasipt() && ~strismember(mode,noniptmodes)
@@ -51,12 +53,16 @@ end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% defaults
 gaumean = 0;
 gauvar = 0.01;
 snpdensity = 0.05;
 specklevar = 0.05;
 spatialvar = [1 1];
-modestrings = {'gaussian','saltpepper','snp','salt & pepper','speckle','poisson','localvar','spatial','spatialind'};
+ricesig = 0.05;
+
+modestrings = {'gaussian','saltpepper','snp','salt & pepper','speckle','poisson','localvar', ...
+				'spatial','spatialind','rice','rician','ricean'};
 numlvp = 0;
 
 mode = lower(mode);
@@ -64,8 +70,12 @@ if ~strismember(mode,modestrings)
 	error('IMNOISEFB: unknown noise type %s',mode)
 end
 
+% deal with synonymous cases
 if strismember(mode,{'saltpepper','snp','salt & pepper'})
 	mode = 'saltpepper';
+end
+if strismember(mode,{'rice','rician','ricean'})
+	mode = 'rice';
 end
 
 if numel(varargin) > 0
@@ -86,6 +96,8 @@ if numel(varargin) > 0
 						spatialvar = varargin{k};
 					case 'poisson'
 						error('IMNOISEFB: too many arguments for noisetype %s',mode)
+					case 'rice'
+						ricesig = varargin{k};
 				end
 			case 2
 				switch mode
@@ -99,6 +111,8 @@ if numel(varargin) > 0
 					case 'saltpepper'
 						error('IMNOISEFB: too many arguments for noisetype %s',mode)
 					case 'speckle'
+						error('IMNOISEFB: too many arguments for noisetype %s',mode)
+					case 'rice'
 						error('IMNOISEFB: too many arguments for noisetype %s',mode)
 				end
 			otherwise
@@ -145,7 +159,7 @@ end
 
 	
 [inpict inclass] = imcast(inpict,'double');
-inpict = min(max(inpict,0),1);
+inpict = imclamp(inpict);
 
 switch mode
 	case 'gaussian'
@@ -271,9 +285,17 @@ switch mode
 			end
 		end
 		
+	case 'rice'
+		% based on this discussion
+		% https://www.researchgate.net/post/How-can-I-make-an-MRI-image-data-Rician-distributed
+		noise = ricesig*randn([prod(s0(1:2)) 2]); % bivariate zero-mean normal RN
+		noise(:,1) = noise(:,1) + inpict(:); % signal is distance vector V
+		noise = sqrt(sum(noise.^2,2)); % vector magnitude
+		outpict = reshape(noise,s0(1:2)); % reshape to match the image
+
 end
 
-outpict = imcast(min(max(outpict,0),1),inclass);
+outpict = imcast(imclamp(outpict),inclass);
 
 
 

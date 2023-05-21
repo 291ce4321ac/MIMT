@@ -676,9 +676,35 @@
 % hasipt()
 % quietwarning()
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.53 update
 
+% FIXED
+% displace() tuple-as-edgetype didn't work; dunno when that broke; really needs rewrite
+% fixed a bug in gifread()/gifwrite() when trying to use IM options with filenames with spaces
+% extremely dumb bug in imtweak() for 'rgb' legacy mode caused by shortcut efforts
+% immodify() huslok modes didn't correctly reset sliders unless prior mode was also HSx
+%            H sliders could be broken by giving an out-of-range angle via the edit box, forcing a bogus slider postion update
+% new imblend() color modes weren't all added to RGB-only enforcement check
 
+% IMPROVED 
+% added new color modes and lumac to imcompose()
+% added hslyc and hsv/hsvyc modes to imrecolor()
+% added 'dias','sky', and categorical HuSLpok maps to ccmap()
+% added Rician noise to imnoiseFB() based on available references
+% added 'loopcount' and 'dither'/'nodither' options to gifwrite()
+% somehow crammed rectangular LAB/LUV/YPP modes and 6-term support into immodify()
+% added 'lumac' mode to imblend()
+% added shitty 'DSMx' fonts to textim(); might remove later
 
+% ADDED 
+% imcropzoom()
+% uniquant()
+% gray2pcolor()
+% crop2box()
+% puttext()
+% im2ct()
+% gbcam()
 
 
 

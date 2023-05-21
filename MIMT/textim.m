@@ -50,6 +50,10 @@ function outpict = textim(intext,face)
 %      'micronum' is an ultra-compact numeric-only font (size [5 4])
 %      'bithex' is a 4-pixel encoded hexadecimal-only font (size [3 3])
 %      'bithex-gapless' same as 'bithex', but without padding (size [2 2])
+%      'DSM18' is a crude approximation of DejaVu Sans Mono (size [24 11])
+%      'DSM24' is a crude approximation of DejaVu Sans Mono (size [32 14])
+%      'DSM36' is a crude approximation of DejaVu Sans Mono (size [47 22])
+%      'DSM48' is a crude approximation of DejaVu Sans Mono (size [62 29])
 %   Sample sheets for all fonts are provided on the web documentation.
 %
 %   Numeric-only fonts include 0123456789ABCDEFabcdef+-:;.,[]
@@ -172,6 +176,18 @@ switch face
 	case 'bithex-gapless'
 		charw = 2;
 		S = load('bithex-gapless.mat');
+	case 'DSM18'
+		charw = 11;
+		S = load('DSM_18.mat');
+	case 'DSM24'
+		charw = 14;
+		S = load('DSM_24.mat');
+	case 'DSM36'
+		charw = 22;
+		S = load('DSM_36.mat');
+	case 'DSM48'
+		charw = 29;
+		S = load('DSM_48.mat');
 	otherwise
 		error('TEXTIM: unknown font face %s',face)
 end
