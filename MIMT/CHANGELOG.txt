@@ -706,9 +706,14 @@
 % im2ct()
 % gbcam()
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.53.1 update
 
+% FIXED
+% lingrad and radgrad had a 1px oboe
 
-
+% IMPROVED 
+% gbcam() synopsis edits and 'oldschool' map gamma tweak
 
 
 

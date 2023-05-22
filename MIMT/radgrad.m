@@ -115,8 +115,8 @@ end
 % set up coordinates
 s = [s(1:2) size(colors,2)];
 [X Y] = meshgrid(1:s(2),1:s(1));
-p1 = point.*s(1:2);
-r = radius*sqrt(sum(s(1:2).^2));
+p1 = point.*(s(1:2)-1)+1; % denormalize
+r = radius*sqrt(sum((s(1:2)-1).^2)); % denormalize
 
 c1 = 0;
 c2 = r;

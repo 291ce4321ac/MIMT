@@ -114,8 +114,8 @@ end
 % set up coordinates
 s = [s(1:2) size(colors,2)];
 [X Y] = meshgrid(1:s(2),1:s(1));
-p1 = points(1,:).*s(1:2); % denormalize endpoints
-p2 = points(2,:).*s(1:2);
+p1 = points(1,:).*(s(1:2)-1)+1; % denormalize endpoints
+p2 = points(2,:).*(s(1:2)-1)+1;
 
 dx = p2(2)-p1(2); % total distance between endpoints
 dy = p2(1)-p1(1);

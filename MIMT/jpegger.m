@@ -1,4 +1,4 @@
-function outpict = jpegger(inpict,quality,sluramt);
+function outpict = jpegger(inpict,quality,sluramt)
 %   JPEGGER(INPICT, QUALITY, {SLURAMT})
 %       simply returns a copy of INPICT as subject to degradation 
 %       by jpeg compression at QUALITY level
@@ -25,7 +25,7 @@ function outpict = jpegger(inpict,quality,sluramt);
 % Webdocs: http://mimtdocs.rf.gd/manual/html/jpegger.html
 % See also: jpegslur
 
-if nargin ~= 3;
+if nargin ~= 3
     sluramt = [0 0; 0 0; 0 0];
 end
 
