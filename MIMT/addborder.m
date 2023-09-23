@@ -90,11 +90,13 @@ end
 switch edgemode
 	case 'color'
 		if normalized
-			[inpict color] = matchchannels(inpict,color,'normalized');
+			% matchchannels() now expects inputs to be properly-scaled anyway
+			[inpict color] = matchchannels(inpict,color);
 			color = imcast(color,inclass);
 		else
-			[inpict color] = matchchannels(inpict,color);
+			% old behavior expected tuple to have same scale as the paired image
 			color = cast(color,inclass);
+			[inpict color] = matchchannels(inpict,color);
 		end
 
 		oaw = [sum(width(1:2)) sum(width(3:4))];

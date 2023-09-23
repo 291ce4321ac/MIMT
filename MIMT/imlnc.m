@@ -1,74 +1,77 @@
 function outpict = imlnc(inpict,varargin)
-%   IMLNC(INPICT, {MODE}, {OPTIONS})
-%       Levels & Curves tool for I or RGB images. Designed as an 
-%       extension of IMADJUST, HISTEQ, and ADJUSTHISTEQ with added features
-%       to support automatic adjustment of multichannel images and the use of
-%       non-RGB color channels. Also offers nonlinear contrast stretching.
-%       For a GUI interface, see IMMODIFY
+%  IMLNC(INPICT, {MODE}, {PARAMETERS})
+%    Levels & Curves tool for I or RGB images. Designed as an extension 
+%    of IMADJUST with added features to support automatic adjustment of 
+%    multichannel images and the use of non-RGB color channels. 
 %
-%   INPICT is a 3-D or 4-D RGB or RGBA image array
-%       If passing a I/IA image array, some modes may be ignored:
-%          'hsl', 'lchab' will be treated as 'independent'
-%          'histeqlchab','ahisteqlchab' are treated as 'histeqrgb','ahisteqrgb'
-%          modes which operate on hue or chroma conceptually require color information
-%          and will throw an error if fed an I/IA image
+%    For a GUI interface, see immodify().
+%    Histogram EQ functionality has been removed for purposes of clarity.  
+%    See histeqtool() for those features.
 %
-%   MODE is one of the following:
-%       IMADJUST MODES:
-%       'independent' follows the behavior of imadjust(I,stretchlim(I))
-%            In this mode, each channel has its levels stretched independently
-%       'mean' (default) averages the levels returned from stretchlim(I)
-%            This reduces skewing the color balance as 'independent' does.
-%       'min' selects the levels with smallest influence (the outer extrema)
-%       'max' selects the levels with the largest influence (the inner extrema)
-%       'hsl' does levels stretching on L in HSL
-%       'lchab' does levels stretching on L in CIE LCHab
-%       'hue' stretches H in HuSLab
-%       'chroma' stretches S in HuSLab based on C extrema in LCHab
+%  INPICT is an I/IA/RGB/RGBA/RGBAAA image of any standard image class
+%    Multiframe images are supported.  Alpha content is passed unmodified.
+%    Modes which operate on hue or chroma conceptually require color information
+%    and will throw an error if fed an I/IA image. All modes except 'hue', and 
+%    'chroma' will be treated as 'independent' if the input is I/IA.
 %
-%       HISTEQ MODES:
-%       'histeqrgb' uses HISTEQ on channels indepentently
-%       'histeqlchab' uses HISTEQ on L in CIE LCHab
-%       'histeqh' uses HISTEQ on H in CIE LCHab
-%       'histeqs' uses HISTEQ on S in HuSLab
-%       'ahisteqrgb' uses ADAPTHISTEQ on channels indepentently
-%       'ahisteqlchab' uses ADAPTHISTEQ on L in CIE LCHab
-%       'ahisteqh' uses ADAPTHISTEQ on H in CIE LCHab
-%       'ahisteqs' uses ADAPTHISTEQ on S in HuSLab
+%  MODE specifies how color images are handled:
+%    'independent' follows the behavior of imadjust(I,stretchlim(I))
+%       In this mode, each channel has its levels stretched independently
+%    'mean' (default) averages the levels returned from stretchlim(I)
+%       This reduces skewing the color balance as 'independent' does.
+%    'min' selects the levels with smallest influence (the outer extrema)
+%    'max' selects the levels with the largest influence (the inner extrema)
+%    'hsl' does levels stretching on L in HSL
+%    'lchab' does levels stretching on L in CIE LCHab
+%    'hue' stretches H in HuSLab
+%    'chroma' stretches S in HuSLab based on C extrema in LCHab
 %
-%   OPTIONS are specified as key-value pairs
-%   imadjust modes accept the following:
-%       'inrange' or 'in' specifies the input range [lo hi]
-%            if inrange is unspecified or empty, it will be calculated automatically
-%            as in IMADJUST(I), using the specified or default tolerance
-%       'outrange' or 'out' specifies the output range [lo hi] (default [0 1])
-%       'gamma' or 'g' specifies the gamma (default 1)
-%       'contrast' or 'k' specifies the contrast amount (default 1)
-%            When k>1, contrast is increased about the central gray value.
-%            When k=1 and g=1, transfer curve is linear (default)
-%       'tolerance' or 'tol' specifies the tolerance for autoadjusting (default 0.001)
+%  PARAMETERS are specified as key-value pairs
+%    'inrange' or 'in' specifies the input range [lo hi]
+%       If inrange is unspecified or empty, it will be calculated automatically
+%       as in IMADJUST(I), using the specified or default tolerance
+%    'outrange' or 'out' specifies the output range [lo hi] (default [0 1])
+%    'gamma' or 'g' specifies the gamma (default 1)
+%       When g>1, transfer curve is stretched downward, darkening the image by
+%       reducing shadow contrast and increasing highlight contrast.
+%    'sgamma' or 'sg' specifies a symmetric gamma curve (default 1)
+%       Reduces extreme contrast near black for sg<1 when compared to 'g'.
+%       Reduces extreme contrast near white for sg>1 when compared to 'rg'.
+%       Also allows for symmetric shifts when combined with 'k'.  See help sgamma.
+%       While a symmetric curve can be achieved with a combination of 'g' and 'rg',
+%       'sg' is a convenience and is already scaled to match the parameter sensitivity 
+%       customary of a simple power function like 'g' or 'rg'.
+%    'rgamma' or 'rg' specifies a reversed gamma curve (default 1)
+%       Where a normal gamma curve has strongest influence over dark regions,
+%       this parameter has strongest influence over bright regions. A combination 
+%       of 'g' and 'rg' can be used to bend the curve in various ways.
+%    'contrast' or 'k' specifies the contrast amount (default 1)
+%       When k>1, contrast is increased about the central gray value.
+%       Similar to 'sg', this functionality can be obtained through a combination
+%       of 'g' and 'rg', but a single-term contrast parameter is a convenience.
+%    'tolerance' or 'tol' specifies the tolerance for autoadjusting (default 0.001)
 %
-%   histeq modes currently operate only using default parameters
-%   Note that histeq modes inherit restrictions on minimum image dimensions
-%
-%   EXAMPLE:
-%   % replicate behavior of imadjust(RGB,stretchlim(RGB))
-%   outpict=imlnc(inpict,'independent','tol',0.01)
-%   % auto-adjust limits and stretch contrast in L
-%   outpict=imlnc(inpict,'lchab','k',1.1)
-%   
-%   CLASS SUPPORT:
-%   Supports 'uint8', 'uint16', 'int16', 'single', and 'double'
+%  Output class is inherited from input
+% 
+%  EXAMPLE:
+%  % replicate behavior of imadjust(RGB,stretchlim(RGB))
+%    outpict = imlnc(inpict,'independent','tol',0.01)
+%  % auto-adjust limits and stretch contrast in L
+%    outpict = imlnc(inpict,'lchab','k',1.1)
+%  % do the same thing without altering input limits
+%    outpict = imlnc(inpict,'lchab','in',[0 1],'k',1.1)
 %
 % Webdocs: http://mimtdocs.rf.gd/manual/html/imlnc.html
-% See also: IMLNCLITE, imbcg, imcurves, IMMODIFY, IMTWEAK, IMADJUSTFB, TONEMAP.
+% See also: imlnclite, imbcg, imcurves, immodify, imtweak, imadjustFB
 
 inrange = [];
 outrange = [0 1];
 k = 1;
 g = 1;
+sg = 1; 
+rg = 1;
 tol = 0.001;
-modestrings = {'independent','mean','min','max','hsl','lchab','histeqh','histeqs','ahisteqh','ahisteqs','hue','chroma','histeqrgb','ahisteqrgb'};
+modestrings = {'independent','mean','min','max','hsl','lchab','hue','chroma'};
 mode = 'average';
 
 vk = 1;
@@ -87,10 +90,16 @@ while vk<=length(varargin)
             k = varargin{vk+1};
 			vk = vk+2;
         case {'g','gamma'}
-            g = varargin{vk+1};
+            g = max(varargin{vk+1},0);
+			vk = vk+2;
+		case {'sg','sgamma'}
+            sg = max(varargin{vk+1},0);
+			vk = vk+2;
+		case {'rg','rgamma'}
+            rg = max(varargin{vk+1},eps);
 			vk = vk+2;
 		case {'tol','tolerance'}
-			tol = varargin{vk+1};
+			tol = max(varargin{vk+1},0);
 			vk = vk+2;
         otherwise
             error('IMLNC: unknown input parameter name %s',varargin{vk})
@@ -99,25 +108,16 @@ end
 
 numchans = size(inpict,3);
 [inpict inclass] = imcast(inpict,'double');
+[inpict alpha] = splitalpha(inpict);
 
-if any(numchans == [2 4])
-	alpha = inpict(:,:,end,:);
-	inpict = inpict(:,:,end-1,:);
-end
+% single-channel inputs simplify
 if any(numchans == [1 2]) 
-	switch lower(mode)
-		case {'hsl','lchab'}
-			mode = 'independent';
-		case 'histeqlchab'
-			mode = 'histeqrgb';
-		case 'ahisteqlchab'
-			mode = 'ahisteqrgb';
-		case {'histeqh','histeqs','ahisteqh','ahisteqs','hue','chroma'}
-			error('IMLNC: the %s mode requires image to be RGB',lower(mode))
+	if strismember(lower(mode),{'hue','chroma'})
+		error('IMLNC: the %s mode requires image to be RGB',lower(mode))
+	else
+		mode = 'independent';
 	end
 end
-
-lvvec = [0 1 outrange(1) outrange(2) g];
 
 outpict = zeros(size(inpict));
 for f = 1:size(inpict,4)
@@ -128,40 +128,35 @@ for f = 1:size(inpict,4)
 			if isempty(inrange)
 				inrange = stretchlimFB(protoimage,tol);
 			end
-			protoimage = imadjustFB(protoimage,inrange,[lvvec(3);lvvec(4)],lvvec(5));
-			protoimage = stretchcurve(protoimage,k);
+			protoimage = corexform(protoimage,inrange,outrange,g,sg,rg,k);
 			
 		case {'mean','average'}
 			if isempty(inrange)
 				inrange = stretchlimFB(protoimage,tol);
 			end
-			lvvec(1:2) = mean(inrange,2)';
-			protoimage = imadjustFB(protoimage,[lvvec(1);lvvec(2)],[lvvec(3);lvvec(4)],lvvec(5));
-			protoimage = stretchcurve(protoimage,k);
+			inrange = mean(inrange,2)';
+			protoimage = corexform(protoimage,inrange,outrange,g,sg,rg,k);
 			
 		case 'min'
 			if isempty(inrange)
 				inrange = stretchlimFB(protoimage,tol);
 			end
-			lvvec(1:2) = [min(inrange(1,:)) max(inrange(2,:))];
-			protoimage = imadjustFB(protoimage,[lvvec(1);lvvec(2)],[lvvec(3);lvvec(4)],lvvec(5));
-			protoimage = stretchcurve(protoimage,k);
+			inrange = [min(inrange(1,:)) max(inrange(2,:))];
+			protoimage = corexform(protoimage,inrange,outrange,g,sg,rg,k);
 			
 		case 'max'
 			if isempty(inrange)
 				inrange = stretchlimFB(protoimage,tol);
 			end
-			lvvec(1:2) = [max(inrange(1,:)) min(inrange(2,:))];
-			protoimage = imadjustFB(protoimage,[lvvec(1);lvvec(2)],[lvvec(3);lvvec(4)],lvvec(5));
-			protoimage = stretchcurve(protoimage,k);
+			inrange = [max(inrange(1,:)) min(inrange(2,:))];
+			protoimage = corexform(protoimage,inrange,outrange,g,sg,rg,k);
 			
 		case 'hsl'
 			inpictlch = rgb2hsl(protoimage);
 			if isempty(inrange)
 				inrange = stretchlimFB(inpictlch(:,:,3),tol);
 			end
-			adjustedL = imadjustFB(inpictlch(:,:,3),inrange,[lvvec(3);lvvec(4)],lvvec(5));
-			adjustedL = stretchcurve(adjustedL,k);
+			adjustedL = corexform(inpictlch(:,:,3),inrange,outrange,g,sg,rg,k);
 			protoimage = cat(3,inpictlch(:,:,1:2),adjustedL);
 			protoimage = hsl2rgb(protoimage);
 			
@@ -171,8 +166,7 @@ for f = 1:size(inpict,4)
 			if isempty(inrange)
 				inrange = stretchlimFB(adjustedL,tol);
 			end
-			adjustedL = imadjustFB(adjustedL,inrange,[lvvec(3);lvvec(4)],lvvec(5));
-			adjustedL = stretchcurve(adjustedL,k);
+			adjustedL = corexform(adjustedL,inrange,outrange,g,sg,rg,k);
 			protoimage = cat(3,adjustedL*100,inpictlch(:,:,2:3));
 			protoimage = lch2rgb(protoimage,'lab','truncatelch');
 			
@@ -188,8 +182,7 @@ for f = 1:size(inpict,4)
 			if isempty(inrange)
 				inrange = stretchlimFB(adjustedH,tol);
 			end
-			adjustedH = imadjustFB(adjustedH,inrange,[lvvec(3);lvvec(4)],lvvec(5));
-			adjustedH = stretchcurve(adjustedH,k);
+			adjustedH = corexform(adjustedH,inrange,outrange,g,sg,rg,k);
 			protoimage = cat(3,adjustedH*360,inpicthusl(:,:,2:3));
 			protoimage = husl2rgb(protoimage,'lab');
 			
@@ -205,8 +198,7 @@ for f = 1:size(inpict,4)
 			if isempty(inrange)
 				inrange = stretchlimFB(adjustedH,tol);
 			end
-			adjustedH = imadjustFB(adjustedH,inrange,[lvvec(3);lvvec(4)],lvvec(5));
-			adjustedH = stretchcurve(adjustedH,k);
+			adjustedH = corexform(adjustedH,inrange,outrange,g,sg,rg,k);
 			protoimage = cat(3,inpictlch(:,:,1:2),adjustedH*360);
 			protoimage = lch2rgb(protoimage,'lab','truncatelch');
 			
@@ -220,65 +212,19 @@ for f = 1:size(inpict,4)
 				inpictlch = rgb2lch(protoimage,'lab');
 				adjustedC = inpictlch(:,:,2)/100;
 				inrange = stretchlimFB(adjustedC,tol);
-				lvvec(1:2) = inrange;
-				limidx = find(adjustedC >= lvvec(2),1);
-				lvvec(1:2) = [0 adjustedS(limidx)];
-			else
-				lvvec(1:2) = inrange;
+				limidx = find(adjustedC >= inrange(2),1);
+				inrange = [0 adjustedS(limidx)];
 			end
 			
-			lvvec(2) = lvvec(2)+eps;  %this avoids issues if 3-ch gray images are passed (0 chroma)
-			adjustedS = imadjustFB(adjustedS,[lvvec(1);lvvec(2)],[lvvec(3);lvvec(4)],lvvec(5));
-			adjustedS = stretchcurve(adjustedS,k);
+			if diff(inrange) == 0
+				%this avoids issues if 3-ch gray images are passed (0 chroma)
+				inrange(2) = inrange(2)+eps;  
+			end
+			
+			adjustedS = corexform(adjustedS,inrange,outrange,g,sg,rg,k);
 			protoimage = cat(3,inpicthusl(:,:,1),adjustedS*100,inpicthusl(:,:,3));
 			protoimage = husl2rgb(protoimage,'lab');
 			
-		case 'ahisteqlchab'
-			inpictlch = rgb2lch(protoimage,'lab');
-			adjustedL = adapthisteq(inpictlch(:,:,1)/100);
-			protoimage = cat(3,adjustedL*100,inpictlch(:,:,2:3));
-			protoimage = lch2rgb(protoimage,'lab','truncatelch');
-			
-		case 'ahisteqrgb'
-			for c = 1:size(protoimage,3)
-				protoimage(:,:,c) = adapthisteq(protoimage(:,:,c));
-			end
-			
-		case 'histeqlchab'
-			inpictlch = rgb2lch(protoimage,'lab');
-			adjustedL = histeq(inpictlch(:,:,1)/100);
-			protoimage = cat(3,adjustedL*100,inpictlch(:,:,2:3));
-			protoimage = lch2rgb(protoimage,'lab','truncatelch');
-			
-		case 'histeqrgb'
-			for c = 1:size(protoimage,3)
-				protoimage(:,:,c) = histeq(protoimage(:,:,c));
-			end
-			
-		case 'histeqh'
-			inpictlch = rgb2lch(protoimage,'lab');
-			adjustedH = histeq(inpictlch(:,:,3)/360);
-			protoimage = cat(3,inpictlch(:,:,1:2),adjustedH*360);
-			protoimage = lch2rgb(protoimage,'lab','truncatelch');
-		
-		case 'histeqs'
-			inpicthusl = rgb2husl(protoimage,'lab');
-			adjustedS = histeq(inpicthusl(:,:,2)/100);
-			protoimage = cat(3,inpicthusl(:,:,1),adjustedS*100,inpicthusl(:,:,3));
-			protoimage = husl2rgb(protoimage,'lab');
-			
-		case 'ahisteqh'
-			inpictlch = rgb2lch(protoimage,'lab');
-			adjustedH = adapthisteq(inpictlch(:,:,3)/360);
-			protoimage = cat(3,inpictlch(:,:,1:2),adjustedH*360);
-			protoimage = lch2rgb(protoimage,'lab','truncatelch');
-		
-		case 'ahisteqs'
-			inpicthusl = rgb2husl(protoimage,'lab');
-			adjustedS = adapthisteq(inpicthusl(:,:,2)/100);
-			protoimage = cat(3,inpicthusl(:,:,1),adjustedS*100,inpicthusl(:,:,3));
-			protoimage = husl2rgb(protoimage,'lab');
-
 		otherwise
 			error('IMLNC: Unknown mode specified')
 	end
@@ -286,38 +232,25 @@ for f = 1:size(inpict,4)
 	outpict(:,:,:,f) = protoimage;
 end
 
-if any(numchans == [2 4])
-	outpict = cat(3,outpict,alpha);
-end
-
+outpict = joinalpha(outpict,alpha);
 outpict = imcast(outpict,inclass);
 
+end % END MAIN SCOPE
+
+function out = corexform(in,inrange,outrange,g,sg,rg,k)
+	out = imadjustFB(in,inrange,outrange,g);
+	out = rgamma(out,rg); % reverse gamma
+	out = sgamma(out,sg); % symmetric gamma
+	out = stretchcurve(out,k);
 end
 
-function R = stretchcurve(I,k)
-	if k == 1
-		R = I;
-		return;
-	end
-
-	c = 0.5;
-	mk = abs(k) < 1;
-	mc = c < 0.5;
-	if ~xor(mk,mc)
-		pp = k; kk = k*c/(1-c);
+function out = rgamma(in,rg)
+	if rg == 1
+		out = in;
 	else
-		kk = k; pp = (1-c)*k/c;
+		out = 1-impow(1-in,1/rg);
 	end
-
-	hi = I > c; lo = ~hi;
-	R = zeros(size(I));
-	R(lo) = 0.5*((1/c)*I(lo)).^kk;
-	R(hi) = 1-0.5*((1-I(hi))*(1/(1-c))).^pp;
 end
-
-
-
-
 
 
 

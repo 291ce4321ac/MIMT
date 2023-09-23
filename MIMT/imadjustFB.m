@@ -44,19 +44,37 @@ end
 % IF IPT IS NOT INSTALLED
 if automode
 	inrange = stretchlimFB(inpict);
-elseif size(inpict,3) == 3 && size(inrange,2) == 1
-	inrange = repmat(reshape(inrange,2,1),[1 3]);
+elseif size(inpict,3) == 1 && numel(inrange) == 2
+	inrange = inrange(:);
+elseif size(inpict,3) == 3 && numel(inrange) == 2
+	inrange = repmat(inrange(:),[1 3]);
+elseif size(inpict,3) == 3 && numel(inrange) == 6
+	if size(inrange,1) == 2
+		% nop
+	elseif size(inrange,1) == 3
+		inrange = inrange.';
+	else
+		error('IMADJUSTFB: INRANGE must be either a 2-element vector or a 2x3 matrix')
+	end
 end
-inrange = max(min(inrange),1,0);
 	
 [inpict inclass] = imcast(inpict,'double');
 outpict = zeros(size(inpict));
 for c = 1:size(inpict,3)
-	outpict(:,:,c) = ((inpict(:,:,c)-inrange(1,c))./(inrange(2,c)-inrange(1,c))).^gamma;
-	outpict(:,:,c) = outpict(:,:,c).*(outrange(2)-outrange(1))+outrange(1);
+	if inrange(1,c) ~= 0 || inrange(2,c) ~= 1
+		outpict(:,:,c) = (inpict(:,:,c)-inrange(1,c))./(inrange(2,c)-inrange(1,c));
+	else
+		outpict(:,:,c) = inpict(:,:,c);
+	end
+	if gamma ~= 1
+		outpict(:,:,c) = impow(outpict(:,:,c),gamma);
+	end
+	if outrange(1) ~= 0 || outrange(2) ~= 1
+		outpict(:,:,c) = outpict(:,:,c).*(outrange(2)-outrange(1))+outrange(1);
+	end
 end
-outpict = max(min(real(outpict),1),0);
 
+outpict = imclamp(real(outpict));
 outpict = imcast(outpict,inclass);
 
 end % END MAIN SCOPE

@@ -12,6 +12,7 @@ function outpict = displace(inpict,amount,varargin)
 %       If any specified map is not monochrome, displacements will be
 %       performed on channels independently.  (see mono() for details)
 %       Use 'mono' option to override this behavior.
+%       The null value for these maps is 50% gray, not zero.
 %   'edgetype' indicate that the following specifies how edges are handled
 %       'wrap' wraps the image circularly (default)
 %       'replicate' performs edge replication (similar to 'smear' in GIMP)

@@ -4,7 +4,7 @@ function p = factor2(innum,varargin)
 %   the 2D geometries into which a given vector can be arranged,  
 %   for instance, when devectorizing images of unknown geometry.
 %
-%  N is a scalar integer (not necessarily integer-class)
+%  N is a positive scalar integer (not necessarily integer-class)
 %  OPTIONS include the key-value pairs:
 %   'minar' specifies the minimum normalized aspect ratio (default 0)
 %      The normalized aspect ratio of the 2-tuple f is min(f)/max(f).  
@@ -46,7 +46,7 @@ function p = factor2(innum,varargin)
 %      4     3
 %  
 %  Webdocs: http://mimtdocs.rf.gd/manual/html/factor2.html
-%  See also: factor3, reshape, imrectify
+%  See also: factor3, squaresize, reshape, imrectify
 
 % i make no claims that this is the best way to do this
 % it probably isn't, but it works.
@@ -81,7 +81,8 @@ if minar<0 || minar>1
 end
 
 % prime factors of innum
-f = [1 factor(abs(innum))];
+innum = abs(innum);
+f = [1 factor(innum)];
 
 % build valid non-prime factor list
 a = [];

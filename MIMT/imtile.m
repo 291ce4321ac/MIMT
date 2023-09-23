@@ -84,7 +84,7 @@ end
 
 % add padding frames if necessary
 if prod(tiling) > numframes
-	[inpict padcolor] = matchchannels(inpict,padcolor,'normalized');
+	[inpict padcolor] = matchchannels(inpict,padcolor);
 	padcolor = imcast(padcolor,class(inpict));
 	blankframe = colorpict(szin(1:2),padcolor,class(inpict));
 	inpict = cat(4,inpict,repmat(blankframe,[1 1 1 prod(tiling)-numframes]));

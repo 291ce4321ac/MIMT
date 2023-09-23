@@ -715,6 +715,88 @@
 % IMPROVED 
 % gbcam() synopsis edits and 'oldschool' map gamma tweak
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.54 update
+
+% FIXED
+% factor2()/factor3() would give half-complete results for negative inputs
+%    since the implicit assumption is that the inputs are positive, enforce that
+% immodify() wasn't resetting imtweak sliders in certain transition cases
+
+% IMPROVED 
+% added 'emugreen' to gbcam()
+% imadjustFB():
+%   added better size checks on inrange parameter
+%   added conditional skips for each part of the transform
+%   used impow() for speed boost 
+%     only used in FB path, though it's faster than IPT in R2019b
+% imlnc():
+%   added sgamma/rgamma options
+%   moved stretchcurve() to an external function
+%     this improves code sharing and offers speed boost using conditional LUT
+%   moved histeq()/ahisteq() modes to histeqtool()
+%     this makes imlnc() easier to understand by limiting its scope
+%     and allows histeqtool() to more easily support the full functionality of underlying tools
+% immodify(): cleaned up levels panel, added sgamma/rgamma param
+% ctflop(): added support for higher dimensional arrays
+% matchchannels(): complete rewrite, intentionally breaks compatibility with legacy usage!
+%   inputs are any mixed pair of images/tuples/stacks
+%   behavior is no longer strictly expansion (though that's still the default)
+%   interpretation of tuple scale is dependent on the tuple's class, not the class of an accompanying image
+%   updated matchchannels() usage in addborder()/imtile()
+% imcast(): added support for uint32, int8, int32
+%   tried to improve compactness, but a giant conditional tree is still significantly faster
+%   several non-passthrough cases should see speed improvement (depends on ML version)
+% colordiff(): added tuple support
+
+% ADDED 
+% soft-private functions are in MIMT_private directory
+% i'm avoiding making these true private functions because i want them to remain visible
+% these are internally documented, but not part of the webdocs
+% stretchcurve() (soft-private)
+% impow() (soft-private)
+% sgamma() (soft-private)
+% unitaxes() (soft-private)
+% histeqtool()
+% autowb()
+% squaresize()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

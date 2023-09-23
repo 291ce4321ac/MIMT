@@ -13,6 +13,7 @@ function outpict = gbcam(inpict,cmode,upscale)
 %  CMODE specifies the colormap to be applied (default 'newschool')
 %    'newschool' is a grayish tan-green, like a GBpocket screen.
 %    'oldschool' is lime and olive green, like an original GB.
+%    'emugreen' is a higher-contrast green palette derived from GB emulators
 %    'gray' is a balance between 'brigray' and 'unigray', with muted extrema.
 %    'brigray' is a commonly-used bright gray map with about 0.68 gamma.
 %    'unigray' is a uniform (linear) gray map.
@@ -80,8 +81,14 @@ elseif ischar(cmode)
 			CT = [46 52 32; 100 110 68; 178 190 129; 227 237 190]/255;
 		case 'oldschool'
 			% the old GB screens were an unsubtle green
-			%CT = [0 59 61; 24 109 66; 47 160 72; 71 210 77]/255;
+			% this and 'newschool' are derived from a number of photos
+			% given the sensitivity to lighting and viewing angle, 
+			% this is a very interpretive approximation of the experience
+			% any position-invariant mapping must be grossly inaccurate -- else this would be lcdemu()
 			CT = [0 59 61; 28 119 67; 53 172 73; 71 210 77]/255; % a bit brighter
+		case 'emugreen'
+			% this is a high-contrast green palette similar to some emulators
+			CT = [1 26 0; 21 73 22; 140 159 0; 165 183 0]/255;
 		otherwise
 			error('GBCAM: unknown CMODE option %s',cmode)
 	end

@@ -950,7 +950,7 @@ CT = hex2uint(hexc,1)
 
 % convert to unit-scale double
 % then convert to hex (6 bytes per tuple)
-CT = im2double(CT);
+CT = imcast(CT,'double');
 hexc = uint2hex(CT,'nbytes',2)
 
 % convert to uint16 numeric array
@@ -1141,11 +1141,12 @@ inpict = imlnc(inpict,'k',1.2);
 scale = 2;
 A = gbcam(inpict,'newschool',scale);
 B = gbcam(inpict,'oldschool',scale);
-C = gbcam(inpict,'gray',scale);
-D = gbcam(inpict,'brigray',scale);
-E = gbcam(inpict,'unigray',scale);
+C = gbcam(inpict,'emugreen',scale);
+D = gbcam(inpict,'gray',scale);
+E = gbcam(inpict,'brigray',scale);
+F = gbcam(inpict,'unigray',scale);
 
-outpict = [A B; C D; E E*0];
+outpict = [A D; B E; C F];
 imshow2(outpict,'invert')
 
 %% im2ct demo
@@ -1203,6 +1204,67 @@ image(rot90(ctflop(1-CT)))
 subplot(8,1,2:8)
 imshow2(outpict,'invert')
 
+%% histeqtool()
+clc; clf; clearvars
+
+inpict = imread('sources/table.jpg');
+
+op1 = histeqtool(inpict,'ahisteqrgb','clip',0.008);
+op2 = histeqtool(inpict,'ahisteqlchab','clip',0.008);
+
+outpict = [op1; op2];
+imshow2(outpict,'invert')
+
+%% autowb()
+clc; clf; clearvars
+
+inpict = imread('sources/handcar_small.jpg');
+outpict = autowb(inpict);
+
+imshow2(outpict,'invert')
+
+%%
+clc; clf; clearvars
+
+inpict = imread('sources/standardmods/hallway_small.jpg');
+
+% use illumwhite()/chromadapt()
+% overexposed regions tend to become unnaturally saturated
+% causing an apparent brightness inversion
+percentileToExclude = 10;
+illuminant_wp1 = illumwhite(inpict,percentileToExclude);
+op1 = chromadapt(inpict,illuminant_wp1,'colorspace','srgb','method','bradford');
+
+% use autowb() with blind white region determination
+% results are generally moderated, but saturated regions are not molested
+op2 = autowb(inpict);
+
+% use autowb() with an explicit mask
+mask = imread('sources/standardmods/hallway_small_mask.png');
+op3 = autowb(inpict,mask);
+
+outpict = [op1; op2; op3];
+%outpict = mono(outpict,'llch');
+imshow2(outpict,'invert')
+
+%% squaresize()
+clc; clf; clearvars
+
+V = rand(1,1564653); % a vector
+N = numel(V); % the vector length
+f = factor2(N,'ordered',false) % note N doesn't have useful factors
+ar = f(:,1)./f(:,2) % obviously these are far from unity
+
+sz = squaresize(N,'fitmode','shrink') % resolve by shrinking the vector
+sq1 = V(1:prod(sz)); % trim and reshape
+sq1 = reshape(sq1,sz);
+ar = min(sz)/max(sz) % square enough
+
+sz = squaresize(N,'fitmode','grow') % resolve by padding the vector
+sq2 = padarray(V,[0 prod(sz)-N],0,'post'); % pad the vector
+sq2 = reshape(sq2,sz);
+ar = min(sz)/max(sz) % square enough
+
 %% 
 clc; clf; clearvars
 
@@ -1212,7 +1274,14 @@ clc; clf; clearvars
 %% 
 clc; clf; clearvars
 
+%% 
+clc; clf; clearvars
 
+%% 
+clc; clf; clearvars
+
+%% 
+clc; clf; clearvars
 
 
 

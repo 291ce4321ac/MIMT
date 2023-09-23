@@ -296,10 +296,10 @@ switch kstyle
 		os = round((size(fk,2)-w)/2);
 		fkb = ones([thisbs(1) w]); fkb([1,end],:) = 0.5;
 		fk(:,os+1:os+w) = fkb;
-		
-	% given that this is neither 1970, nor are we otherwise stuck doing integer-only math
+		h
 	% i don't see why these shouldn't just be normalized to meet a common output range.
-	% if you are relying on the over-ranging for implicit thresholding, just do it explicitly.
+	% if you're actually after the difference/gradient estimate, i guess that's a thing
+	% but if you are relying on the over-ranging for implicit thresholding (as seems to be common), just do it explicitly.
 	case 'prewitt'
 		fk = [1 1 1; 0 0 0; -1 -1 -1]/3;
 		

@@ -116,12 +116,68 @@ outpict = fourdee(@imresizeFB,inpict,0.4);
 %gifwrite(outpict,'examples/fourdeeex1.gif');
 
 %% imlnc demo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-inpict = imread('sources/probe.jpg');
+clc; clf; clearvars
 
-outpict = imlnc(inpict);
+inpict = imread('sources/std/lena.jpg');
+inpict = imresize(inpict,0.5);
 
+op1 = imlnc(inpict,'independent'); % shifts color balance
+op2 = imlnc(inpict,'mean'); % default for RGB inputs
+op3 = imlnc(inpict,'lchab'); % causes less saturation shift
+
+outpict = [op1; op2; op3];
 imshow(outpict)
-%imwrite(outpict,'examples/imlncex1.jpg','jpeg','Quality',90);
+%imwrite(outpict,'examples/imlncex1.jpg');
+
+%% demo sgamma compared to power gamma
+clc; clf; clearvars
+
+CT = lines(7);
+
+% a unit-scale test ramp
+x = linspace(0,1,1E3);
+
+g0 = 0.3; % all modes have the same parameter response
+
+% normal gamma (strongest effect on shadows)
+y1 = imlnc(x,'in',[0 1],'out',[0 1],'g',g0,'k',1);
+y2 = imlnc(x,'in',[0 1],'out',[0 1],'g',1/g0,'k',1);
+plot(x,[y1; y2],'--','color',CT(1,:)); hold on
+
+% reverse gamma (strongest effect on highlights)
+y1 = imlnc(x,'in',[0 1],'out',[0 1],'rg',g0,'k',1);
+y2 = imlnc(x,'in',[0 1],'out',[0 1],'rg',1/g0,'k',1);
+plot(x,[y1; y2],'--','color',CT(2,:))
+
+% symmetric gamma
+y1 = imlnc(x,'in',[0 1],'out',[0 1],'sg',g0,'k',1);
+y2 = imlnc(x,'in',[0 1],'out',[0 1],'sg',1/g0,'k',1);
+plot(x,[y1; y2],'-','color',CT(4,:))
+
+unitaxes(gca)
+
+%% demo sgamma when used for shifting k-curve in imlnc()
+clc; clf; clearvars
+
+CT = lines(7);
+
+% a unit-scale test ramp
+x = linspace(0,1,1E3);
+
+g0 = 0.6;
+k = 2;
+
+% shifting with 'g'
+y1 = imlnc(x,'in',[0 1],'out',[0 1],'g',g0,'k',k);
+y2 = imlnc(x,'in',[0 1],'out',[0 1],'g',1/g0,'k',k);
+plot(x,[y1; y2],'--','color',CT(1,:)); hold on
+
+% shifting with 'sg'
+y1 = imlnc(x,'in',[0 1],'out',[0 1],'sg',g0,'k',k);
+y2 = imlnc(x,'in',[0 1],'out',[0 1],'sg',1/g0,'k',k);
+plot(x,[y1; y2],'-','color',CT(2,:))
+
+unitaxes(gca)
 
 %% imblend demo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 bg = imread('sources/probe.jpg');
@@ -1269,7 +1325,8 @@ imshow(outpict)
 clear all; clc;
 inpict = imread('sources/probe.jpg');
 
-outpict = addborder(inpict,[10 25],[128 0 255 128]);
+%outpict = addborder(inpict,[10 25],[128 0 255 128]);
+outpict = addborder(inpict,[10 25],[1 0.3 0.8 0.5],'normalized');
 
 imshow2(outpict)
 % imwrite(outpict(:,:,1:3),'examples/addborderex2.png','alpha',outpict(:,:,4));
@@ -2186,7 +2243,7 @@ colortable = colorpicker(inpict,'invert')
 inpict = imread('sources/blacklight2.jpg');
 incolor = [0.5 1];
 
-[outpict outcolor] = matchchannels(inpict,incolor,'normalized');
+[outpict outcolor] = matchchannels(inpict,incolor);
 
 chancount(inpict)
 chancount(outpict)
@@ -2569,7 +2626,7 @@ imshow2('out','invert','tools')
 
 %% 
 % calculate local min/median/max simultaneously
-inpict = imread('sources/peppers.png');
+inpict = imread('peppers.png');
 
 OS = nhfilter(inpict,'ordstat',5,[1 13 25]);
 out = imtile(OS,[3 1]);

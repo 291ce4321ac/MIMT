@@ -4,7 +4,7 @@ function allP = factor3(innum,varargin)
 %   the 3D geometries into which a given vector can be arranged,  
 %   for instance, when devectorizing images of unknown geometry.
 %
-%  N is a scalar integer (not necessarily integer-class)
+%  N is a positive scalar integer (not necessarily integer-class)
 %  OPTIONS include the key-value pairs:
 %   'maxpc' specifies the maximum number of pages (default N)
 %   'minpc' specifies the maximum number of pages (default 1)
@@ -72,7 +72,8 @@ elseif mod(innum,1)~=0
 end
 
 % prime factors of innum
-f = [1 factor(abs(innum))];
+innum = abs(innum);
+f = [1 factor(innum)];
 
 % build valid non-prime factor list
 a = [];
