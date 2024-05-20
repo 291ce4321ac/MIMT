@@ -1,7 +1,7 @@
 function outpict = jpegger(inpict,quality,sluramt)
 %   JPEGGER(INPICT, QUALITY, {SLURAMT})
 %       simply returns a copy of INPICT as subject to degradation 
-%       by jpeg compression at QUALITY level
+%       by JPEG compression at QUALITY level
 %       when a nonzero SLURAMT is specified, behavior changes
 %       exploits a reversed pixel shift operation in order to cause
 %       skewing of the parity maps in the degraded output image.  
@@ -19,6 +19,9 @@ function outpict = jpegger(inpict,quality,sluramt)
 % In other words, use of jpegger() with slur parameters is intended only to
 % emphasize parity maps in heavily compressed output images, whereas
 % jpegslur() would be used to skew the original quality image.
+%
+% As with all other cases where JPG images are saved in MATLAB, 
+% the temporary image is 4:2:0 downsampled.
 % 
 % output class is uint8
 %

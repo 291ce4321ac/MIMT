@@ -82,7 +82,7 @@ if nargin < 2
 	% prepare optional output
 	outtuple = [meanA meanB];
 
-elseif isimageclass(option)
+elseif isimageclass(option,'mimt')
 	szi = imsize(inpict,3);
 	szm = imsize(option,3);
 	ismask = szm(3) == 1 && all(szi(1:2) == szm(1:2));

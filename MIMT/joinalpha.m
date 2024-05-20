@@ -6,7 +6,10 @@ function outpict = joinalpha(outpict,alpha)
 %  INPICT is an I/IA/RGB/RGBA/RGBAAA image of any standard image class
 %  ALPHA is an I/RGB image of any standard image class
 %    If INPICT is I/IA and ALPHA is RGB, ALPHA will be reduced to its luma.
-%    Both images must have the same height and width
+%    Alternatively, INPICT or ALPHA may be specified as a color tuple instead  
+%    of a full image.  If an argument is specified as a tuple, it must still be 
+%    scaled correctly for its class.  If both are specified as tuples, the output 
+%    is a single pixel.  All non-tuple image inputs must have the same geometry.
 %    If both images are multiframe, their framecounts must match.
 %
 %  Output class is inherited from input
@@ -20,6 +23,18 @@ function outpict = joinalpha(outpict,alpha)
 %  See also: splitalpha
 
 if ~isempty(alpha)
+	% expand tuple inputs as necessary
+	opistuple = isvector(outpict) && any(numel(outpict) == [1 2 3 4 6]);
+	alphistuple = isvector(alpha) && any(numel(alpha) == [1 3]);
+	if opistuple && ~alphistuple
+		outpict = repmat(reshape(outpict,1,1,[]),[imsize(alpha,2) 1]);
+	elseif ~opistuple && alphistuple
+		alpha = repmat(reshape(alpha,1,1,[]),[imsize(outpict,2) 1]);
+	elseif opistuple && alphistuple
+		outpict = reshape(outpict,1,1,[]);
+		alpha = reshape(alpha,1,1,[]);
+	end
+	
 	if ~all(imsize(outpict,2) == imsize(alpha,2))
 		error('JOINALPHA: array geometries must match!')
 	end

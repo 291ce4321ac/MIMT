@@ -6,7 +6,7 @@ function outpict = fdblend(inpict,varargin)
 %       routine consists of cyclic interframe color permutation followed by cyclic 
 %       frame blending.  The result is a stack of colorful garbage. Like the other 
 %       related tools, this is an overcomplicated and computationally expensive 
-%       tool with no intended techical use.
+%       tool with no intended technical use.
 %
 %   INPICT is a 4D I/RGB image of any standard image class, though this tool has
 %       no practical utility for single-channel images, as color permutation would

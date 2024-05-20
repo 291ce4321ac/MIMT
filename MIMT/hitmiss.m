@@ -53,11 +53,11 @@ end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if ~isimageclass(se) || ndims(se) > 2
+if ~isimageclass(se,'mimt') || ndims(se) > 2
 	error('HITMISS: Expected SE to be a 2D numeric or logical array.  Fallback methods do not support IPT strel objects or 3D structuring elements.')
 end
 
-if ~isimageclass(se2) || ndims(se2) > 2
+if ~isimageclass(se2,'mimt') || ndims(se2) > 2
 	error('HITMISS: Expected SE2 to be a 2D numeric or logical array.  Fallback methods do not support IPT strel objects or 3D structuring elements.')
 end
 

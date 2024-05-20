@@ -33,7 +33,9 @@ function outpict = nhfilter(inpict,varargin)
 %      This allows for the simultaneous processing of multiple filters.  If ORDER is a vector, 
 %      multiframe inputs are not supported.
 %
-%  Output class is inherited from INPICT
+%  Output class is inherited from INPICT, though mean-normalized modes ('stdn','localcont')  
+%  will produce out-of-range data which will be truncated when the input is integer-class. 
+%  If youwant the full output range when using these modes, use a floating-point input.
 %
 % Webdocs: http://mimtdocs.rf.gd/manual/html/nhfilter.html
 % See also: nlfilter, medfilt2, stdfilt, rangefilt, ordfilt2, modefilt, morphops
@@ -137,8 +139,11 @@ end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if strismember(mode,fpmodes)
+% some functions require float inputs, so convert if necessary
+workinginfloat = strismember(mode,fpmodes);
+if workinginfloat
 	[inpict inclass] = imcast(inpict,'double');
+	outpict = double(outpict); % it's still zero, so don't need to rescale it
 else
 	inclass = class(inpict);
 end
@@ -243,11 +248,13 @@ for f = 1:s(4)
 	end
 end
 
-if isfloat(outpict)
+% integer classes are self-truncating
+% normalized modes produce useful data out-of-range
+if isfloat(outpict) && ~strismember(mode,{'stdn','localcont'})
 	outpict = min(max(outpict,0),1);
 end
 
-if strismember(mode,fpmodes)
+if workinginfloat
 	outpict = imcast(outpict,inclass);
 end
 

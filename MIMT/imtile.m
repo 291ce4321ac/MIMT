@@ -49,7 +49,7 @@ if numel(varargin) > 0
 	while k <= numel(varargin);
 		switch lower(varargin{k})
 			case 'padcolor'
-				if isimageclass(varargin{k+1})
+				if isimageclass(varargin{k+1},'mimt')
 					padcolor = varargin{k+1};
 				else
 					error('IMTILE: expected numeric/logical value for PADCOLOR')

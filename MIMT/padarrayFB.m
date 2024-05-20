@@ -54,7 +54,7 @@ padval = 0;
 if numel(varargin) > 0
 	k = 1;
 	while k <= numel(varargin)
-		if isimageclass(varargin{k})
+		if isimageclass(varargin{k},'mimt')
 			padval = varargin{k};
 		elseif ischar(varargin{k})
 			switch lower(varargin{k})

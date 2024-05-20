@@ -47,8 +47,8 @@ onaxes = 0;
 onimg = 0;
 
 k = 1;
-while k <= length(varargin);
-	if isimageclass(varargin{k})
+while k <= length(varargin)
+	if isimageclass(varargin{k},'mimt')
 		inputimage = varargin{k};
 		k = k+1;
 	elseif ischar(varargin{k})

@@ -761,8 +761,42 @@
 % autowb()
 % squaresize()
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.55 update
 
+% FIXED
+% imerror() miscalculated psnr for signed integer inputs when in 'native' mode
+% puttext() didn't round some of its inputs which should be forced to integer values
+% adding gray2rgb() to mono() broke colortable support; fixed
+% impatmap() synopsis didn't describe PATGROUPS or LEVELS
+% nhfilter() had problems with preallocation class being changed on certain paths
+%   also was truncating output for normalized modes. fixed and added extra synopsis notes.
 
+% IMPROVED 
+% added 'cdscale_display' mode to gray2pcolor() for display emulation
+% added truncation options to histeqtool()
+% added chauvin arnoux thermocamera map estimate to ccmap()
+% minor synopsis edit to imrescale()
+% added IPT/MIMT convention distinction to isimageclass()
+%   updated to use MIMT convention for full class support in IIC call:
+%   imshow2(),autowb(),colorpicker(),continuize(),cropborder(),
+%   hitmiss(),imfilterFB(),imtile(),morphhops(),padarrayFB()
+%   added relevant note to DEPENDENCIES.txt
+% added new R2023b categorical maps to ccmap()
+%   updated to match order changes in R2024a
+%   also added 'oldgem' for no good reason
+% added tuple support to imblend() and joinalpha()
+% added 'native' mode to imclassrange() for better 64b accuracy when needed
+% added 64b support to isimageclass() with synopsis note
+% added uint64/int64 support to imcast() with synopsis notes
+%   improved error distribution in int32-single conversion
+% almost completely rewrote imhistFB(), removing IPT passthrough in order to add 
+%   extra functionality, and to avoid a handful of ancient bugs in IPT imhist().
+%   see forum thread www.mathworks.com/matlabcentral/answers/2120156
+% 
+
+% ADDED 
+% cshist() colorspace histogramming tool
 
 
 

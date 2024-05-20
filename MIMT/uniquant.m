@@ -14,7 +14,8 @@ function outpict = uniquant(inpict,nlevels,varargin)
 %       centered on the input limits, effectively making them half-width for 
 %       default INRANGE.
 %    'cdscale' The behavior is similar to imagesc() or image() with CDataScaling 
-%       set to 'scaled'.  In this case, all bins are equal-width.
+%       set to 'scaled'.  The end bins are adjacent to the input limits, and 
+%       all bins are equal-width.
 %    'fsdither' Uses a Floyd-Steinberg dithering as would rgb2ind(). 
 %    'zfdither' Uses a Zhou-Fang variable-coefficient error-diffusion dither. 
 %    'orddither' Uses a Bayer ordered/patterned dither. 
@@ -36,7 +37,7 @@ function outpict = uniquant(inpict,nlevels,varargin)
 
 % defaults
 inrange = imrange(inpict);
-quantmodes = {'default','cdscale','fsdither','zfdither','orddither'};
+quantmodes = {'default','cdscale','cds','fsdither','zfdither','orddither'};
 thisquantmode = 'default';
 
 if numel(varargin)>=1
@@ -50,7 +51,7 @@ if numel(varargin)>=1
 					error('UNIQUANT: unknown scaling option %s',thisarg)
 			end
 		else
-			inrange = thisarg;
+			inrange = double(thisarg);
 		end
 	end
 end
@@ -76,8 +77,8 @@ outpict = imclamp(outpict); % truncate
 switch thisquantmode
 	case 'default'
 		outpict = outpict*(nlevels-1); % rescale
-	case 'cdscale'
-		outpict = outpict*(nlevels*(1-eps)) - 0.5; % rescale
+	case {'cdscale' 'cds'}
+		outpict = (outpict*nlevels - 0.5)*(1-eps); % rescale
 	case 'fsdither'
 		dummymap = gray(nlevels);
 		outpict = rgb2ind(gray2rgb(outpict),dummymap,'dither');

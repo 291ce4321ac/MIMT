@@ -58,7 +58,7 @@ else
 end
 
 % get input histogram
-hgramin = imhistFB(inpict,nin)';
+hgramin = imhistFB(inpict,nin)'; 
 
 % calculate cumulative hgram sums
 incsum = cumsum(hgramin); 

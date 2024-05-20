@@ -50,9 +50,6 @@ elseif nca > 1
 	error('MONO: expected INPICT to be RGB/RGBA')
 end
 
-% if fed an I/IA image, expand it for sake of consistency
-inpict = gray2rgb(inpict);
-
 % is the image argument a color or a picture?
 if size(inpict,2) == 3 && numel(size(inpict)) < 3
     inpict = ctflop(inpict);
@@ -60,6 +57,9 @@ if size(inpict,2) == 3 && numel(size(inpict)) < 3
 else
 	outsize = [size(inpict,1) size(inpict,2) 1 size(inpict,4)];
 end
+
+% if fed an I/IA image, expand it for sake of consistency
+inpict = gray2rgb(inpict);
 
 % output type is inherited from input
 inclass = class(inpict);

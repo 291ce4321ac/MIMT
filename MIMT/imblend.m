@@ -3,7 +3,7 @@ function  outpict = imblend(FG,BG,opacity,blendmode,varargin)
 %       Blend and composite images or imagesets as one would blend layers in GIMP, Krita, 
 %       or Photoshop. Blending and compositing options are independently configurable.
 %
-%   FG, BG are image arrays of same H,V dimension
+%   FG, BG are typically image arrays of same page geometry
 %       Mismatches of dimensions 1:2 are not supported. Use IMSTACKER, IMRESIZE,  
 %           IMCROP, or PADARRAY to enforce desired colocation of layer content.
 %       Mismatches of dimension 3 are handled by array expansion.  
@@ -14,6 +14,10 @@ function  outpict = imblend(FG,BG,opacity,blendmode,varargin)
 %       Mismatches of dimension 4 are handled by array expansion.
 %           both can be single images or 4-D imagesets of equal length
 %           can also blend a single image with a 4-D imageset
+%       FG or BG may alternatively be specified as an I/IA/RGB/RGBA color tuple instead of a full image.  
+%       If an argument is specified as a tuple, it must still be scaled correctly for its class.  
+%       If both are specified as tuples, the output is a single pixel.  All non-tuple image 
+%       inputs must have the same geometry.
 %   OPACITY is a scalar from 0 to 1
 %       defines mixing of blended result and original BG
 %   BLENDMODE is the desired blend mode name (see list & notes) 
@@ -44,6 +48,8 @@ function  outpict = imblend(FG,BG,opacity,blendmode,varargin)
 %       'complement' inverts both inputs and output (i.e. Rcomp(FG,BG) = 1-R(1-FG,1-BG))
 %       This simplistic wrapper approach may result in AMOUNT behaving in unexpected ways.
 %       These blend transformations do not change compositing order.
+%   The user may also use 'notuple' to disable support for color tuples if it's absolutely 
+%   necessary to handle tiny single-channel images that might otherwise be misinterpreted.  
 %       
 %   ============================= BLEND MODES =============================
 %   Opacity & Composition
@@ -748,8 +754,9 @@ transpose = 0;
 complement = 0;
 linblend = false;
 lincomp = false;
+supporttuples = true;
 
-opacity = min(max(opacity,0),1);
+opacity = imclamp(opacity);
 
 compkeyset = 0;
 for k = 1:1:length(varargin)
@@ -793,6 +800,8 @@ for k = 1:1:length(varargin)
 				wclass = 'double';
 			case 'single'
 				wclass = 'single';
+			case 'notuples'
+				supporttuples = false;
 			otherwise
 				if ~quiet % only suppressed if quiet key comes first!
 					fprintf('IMBLEND: Ignoring unknown key ''%s''\n',key)
@@ -806,6 +815,21 @@ if strcmp(compositionmode,'translucent')
 	lincomp = true;
 end
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% expand tuple inputs %%%%%%%%%%%%%%%%%%%%%%%%%
+if supporttuples
+	fgistuple = isvector(FG) && any(numel(FG) == [1 2 3 4]);
+	bgistuple = isvector(BG) && any(numel(BG) == [1 2 3 4]);
+	
+	if fgistuple && ~bgistuple
+		FG = repmat(reshape(FG,1,1,[]),[imsize(BG,2) 1]);
+	elseif ~fgistuple && bgistuple
+		BG = repmat(reshape(BG,1,1,[]),[imsize(FG,2) 1]);
+	elseif fgistuple && bgistuple
+		FG = reshape(FG,1,1,[]);
+		BG = reshape(BG,1,1,[]);
+	end
+end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % check and modify datatypes %%%%%%%%%%%%%%%%%%%%%%%%%

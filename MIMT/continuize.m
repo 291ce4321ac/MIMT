@@ -140,7 +140,11 @@ if numel(varargin) > 0
 			% the next expected argument is inpict
 			% everything after that are arguments for the function specified by fhandle
 			fhandle = varargin{k};
-			if isimageclass(varargin{k+1})
+			% this will allow MIMT-supported classes to be fed to non-MIMT functions, which might break
+			% this is a fundamental problem with the artificial class restrictions 
+			% and arbitrary nonsense associations between class and page count made within IPT/MATLAB
+			% and the fact that we don't know what conventions are being assumed by whatever the user calls  
+			if isimageclass(varargin{k+1},'mimt')
 				inpict = varargin{k+1};
 			else
 				error('CONTINUIZE: INPICT is not of a standard image class\n')

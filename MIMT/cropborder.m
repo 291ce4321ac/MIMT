@@ -99,8 +99,8 @@ end
 % omitnan functionality introduced to var(), mean() in R2015a
 isnew = ifversion('>=','R2015a');
 
-if ~isimageclass(inpict)
-	error('CROPBORDER: INPICT is not of a standard image class\n')
+if ~isimageclass(inpict,'mimt')
+	error('CROPBORDER: INPICT is not of a standard image class')
 end
 
 if sum(numel(width) == [1 2 4]) == 0

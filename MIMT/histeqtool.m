@@ -1,6 +1,6 @@
 function [outpict T] = histeqtool(inpict,mode,varargin)
-%  OUTPICT = HISTEQTOOL(INPICT,MODE,{EXTRAARGS})
-%  [OUTPICT TF] = HISTEQTOOL(INPICT,MODE,{EXTRAARGS})
+%  OUTPICT = HISTEQTOOL(INPICT,MODE,{TRUNCOPT},{EXTRAARGS})
+%  [OUTPICT TF] = HISTEQTOOL(INPICT,MODE,{TRUNCOPT},{EXTRAARGS})
 %    Simple wrapper tool for histeqFB() and adapthisteqFB() for simplified use
 %    on both I and RGB images.  This makes it simpler to apply these tools to 
 %    components of color images.
@@ -23,6 +23,10 @@ function [outpict T] = histeqtool(inpict,mode,varargin)
 %      'ahisteqlchab' operates on L in CIE LCHab
 %      'ahisteqh' operates on H in CIE LCHab
 %      'ahisteqs' operates on S in HuSLab
+%
+%  TRUNCOPT optionally specifies the truncation behavior used in LCH modes.  
+%    Supported modes are 'notruncate','truncatergb','truncatelch','truncatelchcalc'.
+%    Default is 'truncatelch'. See lch2rgb() for more information.
 % 
 %  EXTRAARGS are any extra arguments to be passed to histeqFB() or adapthisteqFB().
 %    When using these, bear in mind that these MIMT tools differ slightly from their
@@ -42,6 +46,14 @@ modestrings = {'histeqrgb','histeqlchab','histeqh','histeqs',...
 			'ahisteqlchab','ahisteqh','ahisteqs','ahisteqrgb'};
 if ~strismember(mode,modestrings)
 	error('HISTEQTOOL: unsupported mode %s',lower(mode))
+end
+
+% handle truncation option spec
+truncmode = 'truncatelch'; % default
+truncmodes = {'notruncate','truncatergb','truncatelch','truncatelchcalc'};
+if ~isempty(varargin) && ischar(varargin{1}) && strismember(varargin{1},truncmodes)
+	truncmode = varargin{1};
+	varargin(1) = [];
 end
 		
 % prepare image
@@ -86,13 +98,13 @@ for f = 1:sz(4)
 			inpictlch = rgb2lch(protoimage,'lab');
 			[adjustedL T{f}] = histeqFB(inpictlch(:,:,1)/100,varargin{:});
 			protoimage = cat(3,adjustedL*100,inpictlch(:,:,2:3));
-			protoimage = lch2rgb(protoimage,'lab','truncatelch');
+			protoimage = lch2rgb(protoimage,'lab',truncmode);
 			
 		case 'histeqh'
 			inpictlch = rgb2lch(protoimage,'lab');
 			[adjustedH T{f}] = histeqFB(inpictlch(:,:,3)/360,varargin{:});
 			protoimage = cat(3,inpictlch(:,:,1:2),adjustedH*360);
-			protoimage = lch2rgb(protoimage,'lab','truncatelch');
+			protoimage = lch2rgb(protoimage,'lab',truncmode);
 		
 		case 'histeqs'
 			inpicthusl = rgb2husl(protoimage,'lab');
@@ -110,13 +122,13 @@ for f = 1:sz(4)
 			inpictlch = rgb2lch(protoimage,'lab');
 			adjustedL = adapthisteqFB(inpictlch(:,:,1)/100,varargin{:});
 			protoimage = cat(3,adjustedL*100,inpictlch(:,:,2:3));
-			protoimage = lch2rgb(protoimage,'lab','truncatelch');
+			protoimage = lch2rgb(protoimage,'lab',truncmode);
 			
 		case 'ahisteqh'
 			inpictlch = rgb2lch(protoimage,'lab');
 			adjustedH = adapthisteqFB(inpictlch(:,:,3)/360,varargin{:});
 			protoimage = cat(3,inpictlch(:,:,1:2),adjustedH*360);
-			protoimage = lch2rgb(protoimage,'lab','truncatelch');
+			protoimage = lch2rgb(protoimage,'lab',truncmode);
 		
 		case 'ahisteqs'
 			inpicthusl = rgb2husl(protoimage,'lab');

@@ -7,7 +7,8 @@ function kimg = imshow2(varargin)
 %
 %    This tool has a number of different features
 %       - Will automatically apply a checkerboard matting to images
-%         with alpha (IA or RGBA)
+%         with alpha (IA/RGBA/RGBAAA)
+%       - Does not restrict channel arrangements based on numeric class.
 %       - Makes use of full axes extents when zooming in on images
 %       - Default behavior uses tight margins for space efficiency.
 %       - Uses akZoom to provide convenient mouse panning and zooming.
@@ -60,7 +61,7 @@ togglestate = [1 1 1 1 1]; % IRGBA
 
 k = 1;
 while k <= length(varargin)
-	if isimageclass(varargin{k})
+	if isimageclass(varargin{k},'mimt')
 		inputimage = varargin{k};
 		k = k+1;
 	elseif ischar(varargin{k})
@@ -87,6 +88,8 @@ while k <= length(varargin)
 					error('IMSHOW2: unknown option %s',varargin{k})
 				end
 		end
+	else
+		error('IMSHOW2: unknown argument')
 	end
 end
 

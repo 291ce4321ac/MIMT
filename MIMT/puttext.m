@@ -44,15 +44,15 @@ if nargin > 2
 			case 'font'
 				fontname = varargin{k+1};
 			case 'offset'
-				offset = varargin{k+1};
+				offset = round(varargin{k+1});
 			case {'fgc','fgcolor'}
 				fgcolor = varargin{k+1};
 			case {'bgc','bgcolor'}
 				bgcolor = varargin{k+1};
 			case 'padsize'
-				padsize = varargin{k+1};
+				padsize = round(varargin{k+1});
 			case 'scale'
-				scale = varargin{k+1};
+				scale = round(varargin{k+1});
 			case 'gravity'
 				gravity = varargin{k+1};
 			case 'angle'

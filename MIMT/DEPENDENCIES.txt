@@ -35,7 +35,6 @@ imcast 			uses/replaces im2double, im2uint8, etc
 imappmat		uses/replaces imapplymatrix (default output class handling differs)
 imcropFB		uses/replaces imcrop
 imfilterFB		uses/replaces imfilter (default edge handling differs)
-imhistFB		uses/replaces imhist
 imresizeFB		uses/replaces imresize
 imrotateFB		uses/replaces imrotate
 imhistmatchFB	uses/replaces imhistmatch
@@ -51,6 +50,8 @@ stretchlimFB	uses/replaces stretchlim
 Other tools don't passthrough to their IPT counterparts, but may fill the same role 
 depending on your needs. For example:
 
+imhistFB		see imhist (this no longer does IPT passthrough)
+cshist			see imhist
 edgemap			see imgradient, edge
 replacepixels	see imoverlay
 uniquant		see gray2ind
@@ -72,6 +73,15 @@ imcompare		see imfuse, imshowpair
 rgb2linear		see rgb2lin
 linear2rgb		see lin2rgb
 and other color space conversion tools
+
+Bear in mind that this passthrough-fallback approach to resolving IPT availability has complications.
+Currently, MIMT is being slowly changed to support a broader set of numeric classes for image data,
+but many IPT/MATLAB tools will not correctly handle things which are otherwise supported during fallback.
+In other words, when a function synopsis says "$ARGUMENT is an array of any standard image class",
+the set of supported classes may depend on whether you have IPT, and violating what's expected
+may result in an error, or it may just silently give you a garbage result.  
+Hopefully those inconsistencies will be fixed in time, but they're subtle and numerous.
+Further concerns exist for uint64/int64 images.  See the imcast() synopsis for more info.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Some files may still require other resources:

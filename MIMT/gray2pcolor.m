@@ -15,6 +15,13 @@ function outpict = gray2pcolor(varargin)
 %       default INRANGE.
 %    'cdscale' The behavior is similar to imagesc() or image() with CDataScaling 
 %       set to 'scaled'.  In this case, all bins are equal-width.
+%    'cdscale_display' Conceptually the same as 'cdscale', but it also emulates 
+%       the second-pass quant that occurs when the image is rendered on-screen 
+%       when using imagesc(), etc. Because of this second pass, gray values 
+%       are not necessarily uniformly distributed anymore, and the number of 
+%       unique levels may be fewer than specified.  
+%       This mode produces an emulated lossy screenshot, whereas 'cdscale' 
+%       produces the clean image it represents.
 %    'fsdither' Uses a Floyd-Steinberg dithering as would rgb2ind(). 
 %    'zfdither' Uses a Zhou-Fang variable-coefficient error-diffusion dither. 
 %    'orddither' Uses a Bayer ordered/patterned dither. 
@@ -33,6 +40,16 @@ switch size(inpict,3)
 		error('GRAY2PCOLOR: INPICT must be I/RGB')
 end
 
+requant = false;
+cdsdmodes = {'cdscale_display','cdsdisplay','cdscaledisplay','cdsd'};
+for k = 1:numel(varargin)
+	thisarg = varargin{k};
+	if ischar(thisarg) && strismember(thisarg,cdsdmodes)
+		varargin{k} = 'cdscale';
+		requant = true;
+	end
+end
+
 CT = varargin{2};
 nlevels = size(CT,1);
 if nlevels>65536
@@ -43,4 +60,21 @@ varargin{2} = nlevels;
 outpict = uniquant(varargin{:}); % uniform quant to map length
 outpict = ind2rgb(outpict,CT); % apply colormap
 
+if requant
+	% adjust to match display quant
+	outpict = floor(outpict*255)/255;
 end
+
+end
+
+
+
+
+
+
+
+
+
+
+
+

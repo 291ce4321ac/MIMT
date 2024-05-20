@@ -17,7 +17,7 @@ function unitaxes(hax)
 	hp(4) = plot(hax,[0.5 1],[0 0.5],'-','color',gc);
 	hp(5) = plot(hax,[0 0.5],[0.5 0],'-','color',gc);
 	hp(6) = plot(hax,[0.5 1],[1 0.5],'-','color',gc);
-	set(hp,'handlevisibility','off')
+	set(hp,'handlevisibility','off','hittest','off')
 	
 	drawnow
 	uistack(hp,'bottom')

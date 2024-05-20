@@ -7,6 +7,7 @@ function outpict = impatmap(inpict,G,ugl,varargin)
 %  INPICT is an I/RGB image of any standard image class.  If IA/RGBA images are 
 %    passed, alpha content will be stripped without composition.  Multiframe
 %    images are not supported.
+%  PATGROUPS and LEVELS are produced by impatsort().
 %  OPTIONS includes the following key-value pairs:
 %    'nlevels' specifies the number of gray levels (default 8)
 %    'stretchcont' specifies how much to stretch the image range (0-1; default 0.5)

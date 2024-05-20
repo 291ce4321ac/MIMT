@@ -1,6 +1,7 @@
 function cset = ccmap(varargin)
 %  CMAP = CCMAP({MAPNAME},{STEPS})
-%   Custom colormap generator originally for MIMT docs processing
+%   Custom colormap/colortable generator originally for MIMT docs processing.
+%   This has since turned into a collection of various useful maps.
 %
 %  MAPNAME is one of the following:
 %    MIMT maps:
@@ -18,19 +19,41 @@ function cset = ccmap(varargin)
 %    'parula14' is a clone of the R2014b-R2017a version of 'parula'
 %    'turbo' is a clone of the turbo() map introduced in R2020b
 %    'sky' is a clone of the sky() map introduced in R2023a
+% 
+%    MATLAB compatibility maps (categorical):
+%    'oldgem' is the lines() map prior to R2014b (7 colors)
+%    'gem' is the same as the R2014b lines() map (7 colors)
+%    'gem12' same as 'gem', but with an extra 5 colors (12 colors)
+%    'glow' (7 colors)
+%    'glow12' (12 colors)
+%    'sail' (5 colors)
+%    'reef' (6 colors)
+%    'meadow' (7 colors)
+%    'dye' (7 colors)
+%    'earth' (7 colors)
+%    With the exception of 'oldgem', these were introduced in R2023b with the orderedcolors()
+%    function, though the included maps reflect minor revisions present by R2024a.
+%    As with lines() and other legacy categorical map generators, the map sequence
+%    is simply repeated if STEPS is longer than the base map length.
 %
 %    Thermocamera maps:
 %    'flir1' is a clone of the black-purple-yellow-white map used in some FLIR cameras
 %    'flir2' is a clone of one of the rainbow maps used in some FLIR cameras
 %    'dias1' is a clone of the rainbow map used by some DIAS cameras
+%    'chauv1' is used by some Chauvin Arnoux Metrix cameras.  Similar to 'flir1'.
+%
+%  STEPS is the desired map length (default 64)
+%    For the MATLAB categorical modes, the default map length is the base map length.
 % 
 % See also: makect, ctpath
 
 mapnamestrings = {'pastel','nrl','hsyp','pwrap','tone','althi','altlo','cat', ...
 					'parula','parula14','turbo','sky', ...
-					'flir1','flir2','dias1'};
+					'oldgem','gem','gem12','glow','glow12','sail','reef','meadow','dye','earth', ...
+					'flir1','flir2','dias1','chauv1'};
 mapname = 'pastel';
 steps = 64;
+usedefaultlength = true;
 
 if numel(varargin) > 0
 	for k = 1:numel(varargin)
@@ -43,6 +66,7 @@ if numel(varargin) > 0
 			end
 		elseif isnumeric(thisarg) && isscalar(thisarg)
 			steps = thisarg;
+			usedefaultlength = false;
 		else
 			error('CCMAP: expected either char or scalar numeric arguments.  what is this?')
 		end
@@ -50,6 +74,72 @@ if numel(varargin) > 0
 end
 
 switch mapname
+	case 'oldgem'
+		CT0 = [0 0 1; 0 0.5 0; 1 0 0; 0 0.75 0.75; 0.75 0 0.75; 0.75 0.75 0; 0.25 0.25 0.25];
+		if usedefaultlength, steps = size(CT0,1); end
+		cset = CT0(mod(0:steps-1,size(CT0,1))+1,:);
+		
+	case 'gem'
+		CT0 = [0 0.447 0.741; 0.85 0.325 0.098; 0.929 0.694 0.125; 0.494 0.184 0.556; 0.466 0.674 0.188; 0.301 0.745 0.933; 0.635 0.078 0.184];
+		if usedefaultlength, steps = size(CT0,1); end
+		cset = CT0(mod(0:steps-1,size(CT0,1))+1,:);
+		
+	case 'gem12'
+		CT0 = [0 0.447 0.741; 0.85 0.325 0.098; 0.929 0.694 0.125; 0.494 0.184 0.556; 0.466 0.674 0.188; 0.301 0.745 0.933; 0.635 0.078 0.184; 1 0.27 0.227; 0.396 0.509 0.992; 1 0.839 0.039; 0 0.639 0.639; 0.796 0.517 0.364];
+		CT0([8 10],:) = CT0([10 8],:); % this changed in one of the late updates to 23b?
+		if usedefaultlength, steps = size(CT0,1); end
+		cset = CT0(mod(0:steps-1,size(CT0,1))+1,:);
+		
+	case 'glow'
+		CT0 = [0.149 0.549 0.866; 0.96 0.466 0.16; 1 0.909 0.392; 0.752 0.36 0.984; 0.286 0.858 0.25; 0.423 0.956 1; 0.949 0.403 0.772];
+		if usedefaultlength, steps = size(CT0,1); end
+		cset = CT0(mod(0:steps-1,size(CT0,1))+1,:);
+		
+	case 'glow12'
+		CT0 = [0.149 0.549 0.866; 0.96 0.466 0.16; 1 0.909 0.392; 0.752 0.36 0.984; 0.286 0.858 0.25; 0.423 0.956 1; 0.949 0.403 0.772; 1 0.478 0.454; 0.49 0.662 1; 0.996 0.752 0.298; 0.121 0.811 0.745; 0.862 0.6 0.423];
+		CT0([8 10],:) = CT0([10 8],:); % this changed in one of the late updates to 23b?
+		if usedefaultlength, steps = size(CT0,1); end
+		cset = CT0(mod(0:steps-1,size(CT0,1))+1,:);
+		
+	case 'sail'
+		CT0 = [0.062 0.258 0.501; 0.329 0.713 1; 1 0.27 0.227; 0.564 0.149 0.133; 0.066 0.443 0.745];
+		if usedefaultlength, steps = size(CT0,1); end
+		cset = CT0(mod(0:steps-1,size(CT0,1))+1,:);
+		
+	case 'reef'
+		CT0 = [0.866 0.329 0; 0.329 0.713 1; 0.066 0.443 0.745; 0.996 0.564 0.262; 0.454 0.921 0.854; 0 0.639 0.639];
+		if usedefaultlength, steps = size(CT0,1); end
+		cset = CT0(mod(0:steps-1,size(CT0,1))+1,:);	
+
+	case 'meadow'
+		CT0 = [0.007 0.345 0.054; 0.227 0.784 0.192; 1 0.839 0.039; 0.96 0.466 0.16; 0.752 0.298 0.043; 0.98 0.541 0.831; 0.49 0.662 1];
+		if usedefaultlength, steps = size(CT0,1); end
+		cset = CT0(mod(0:steps-1,size(CT0,1))+1,:);
+		
+	case 'dye'
+		CT0 = [0.717 0.192 0.172; 0.231 0.666 0.196; 0.368 0.133 0.588; 0.066 0.443 0.745; 0.866 0.329 0; 0.007 0.47 0.501; 0.913 0.317 0.721];
+		if usedefaultlength, steps = size(CT0,1); end
+		cset = CT0(mod(0:steps-1,size(CT0,1))+1,:);
+		
+	case 'earth'
+		CT0 = [0.062 0.258 0.501; 0.717 0.192 0.172; 0.611 0.466 0.125; 0.007 0.345 0.054; 0.862 0.6 0.423; 0.372 0.105 0.031; 1 0.819 0.619];
+		if usedefaultlength, steps = size(CT0,1); end
+		cset = CT0(mod(0:steps-1,size(CT0,1))+1,:);
+				
+	case 'chauv1'
+		% very similar to flir1, but PWL in RGB
+		% extracted map actually has a flat spot at the bottom
+		% i'm assuming that's a defect in the routine that draws the colorbar
+		% as extracted:
+		%CT0 = [19 9 33; 19 9 41; 19 9 48; 19 9 60; 23 9 68; 25 9 71; 30 9 78; 34 9 82; 39 9 89; 44 9 95; 46 9 98; 53 9 107; 55 9 109; 60 9 116; 66 9 123; 69 9 128; 75 9 135; 77 9 138; 82 9 144; 87 9 151; 91 9 155; 96 9 162; 99 9 166; 104 9 171; 107 10 170; 109 10 169; 112 11 168; 114 12 167; 118 12 166; 121 13 165; 124 14 164; 127 14 163; 129 15 162; 132 15 161; 135 16 160; 137 17 160; 141 17 158; 142 18 158; 147 19 156; 150 19 155; 151 20 155; 155 20 154; 157 21 153; 160 22 152; 164 23 151; 165 23 150; 169 24 149; 171 24 148; 174 25 147; 176 27 145; 178 29 142; 180 32 139; 180 33 138; 182 37 134; 184 40 131; 185 42 128; 187 45 125; 188 46 123; 190 49 119; 192 53 116; 193 54 115; 195 57 111; 196 59 109; 198 62 106; 200 65 102; 201 67 100; 203 70 97; 204 71 95; 206 74 92; 208 77 88; 209 79 86; 211 82 83; 211 83 82; 214 87 77; 216 90 74; 216 91 72; 218 94 69; 219 96 67; 222 100 63; 222 101 62; 224 103 59; 226 107 55; 227 109 53; 229 112 49; 230 114 47; 232 116 44; 234 120 40; 235 121 39; 237 124 35; 238 126 34; 240 129 30; 242 132 27; 243 134 24; 245 137 21; 246 138 20; 248 141 16; 250 145 13; 251 146 11; 253 149 7; 253 150 6; 255 154 3; 255 157 3; 255 158 3; 255 160 3; 255 162 3; 255 165 3; 255 168 3; 255 169 3; 255 171 3; 255 173 3; 255 176 3; 255 178 3; 255 180 3; 255 183 3; 255 184 3; 255 186 3; 255 189 3; 255 191 3; 255 194 3; 255 195 3; 255 197 11; 255 199 19; 255 200 22; 255 202 32; 255 203 36; 255 204 43; 255 207 52; 255 208 57; 255 210 64; 255 210 68; 255 212 76; 255 214 84; 255 215 89; 255 217 96; 255 218 100; 255 221 111; 255 222 118; 255 223 121; 255 225 129; 255 226 134; 255 228 143; 255 230 151; 255 231 154; 255 233 161; 255 234 166; 255 236 175; 255 238 183; 255 239 188; 255 241 196; 255 242 199; 255 244 207; 255 245 214; 255 247 220; 255 249 229; 255 250 233; 255 251 240; 255 254 249]/255;
+		%x0 = 1:157;
+		
+		% as transcribed:
+		CT0 = [0.074004 0.035511 0.12833; 0.07392 0.035511 0.23386; 0.40764 0.035511 0.67066; 0.68575 0.096865 0.57595; 1 0.60382 0.011511; 1 0.76464 0.011293; 1 0.99254 0.97334];
+		x0 = [1 6 38 80 165 195 256];
+		xf = linspace(1,max(x0),steps);
+		cset = interp1(x0,CT0,xf);
+		
 	case 'dias1'
 		% similar to the FLIR maps, this was based on available example images, 
 		% but the fitting was done in sRGB instead of LAB

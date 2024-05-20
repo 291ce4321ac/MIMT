@@ -939,6 +939,17 @@ r = imclassrange('double')
 r = imclassrange('uint8')
 r = imclassrange('int16')
 
+%% native mode
+clc; clf; clearvars
+
+% intmax('uint64') can't be represented in double
+rd = imclassrange('uint64');
+fprintf('%.f\n',rd(2)) % this should be an odd integer
+eps(rd(2)) % we are nowhere close to integer-resolution
+
+% but it can in uint64
+rn = imclassrange('uint64','native')
+
 %% hex2uint()/uint2hex()
 clc; clf; clearvars
 
@@ -1131,6 +1142,20 @@ outpict = [B;C;D;E;F];
 outpict = imresizeFB(outpict,2,'nearest'); % resize for web-view
 imshow2(outpict,'invert')
 
+%% 
+clc; clf; clearvars
+
+% demonstrate display emulation
+CT = gray(32);
+A = lingrad([50 200],[0 0; 0 1],[0; 255]);
+B = gray2pcolor(A,CT,'cdscale');
+C = gray2pcolor(A,CT,'cdscale_display');
+
+outpict = imblend(B,C,1,'difference');
+outpict = imresizeFB(outpict,2,'nearest'); % resize for web-view
+outpict = simnorm(outpict); % stretch contrast to reveal semiperiodic error
+imshow2(outpict,'invert')
+
 %% gbcam demo
 clc; clf; clearvars
 
@@ -1265,14 +1290,207 @@ sq2 = padarray(V,[0 prod(sz)-N],0,'post'); % pad the vector
 sq2 = reshape(sq2,sz);
 ar = min(sz)/max(sz) % square enough
 
-%% 
+%% MIMT imhistFB() versus IPT imhist()'s binning misrepresentation
 clc; clf; clearvars
 
-%% 
+inpict = rand(500);
+n = 5;
+
+% histogram bins are centered on [0 1], with a stem plotted
+% in the center of each bin.
+% the stripe segments are edge-aligned to [0 1], so the segments
+% do not line up with the histogram bin locations,
+% and the gray levels in the stripe don't correspond to 
+% the centers of _either_ set of positions.
+% the gray levels correspond to the upper edge of the stripe segment positions.
+% floor(N/2) out of N stripe segments are colored with a gray level
+% that's not even present in the corresponding histogram bin.
+subplot(2,1,1)
+imhist(inpict,n)
+
+% the stripe segments are always aligned with the corresponding
+% histogram bins, and the gray levels correspond to the center of 
+% each histogram bin.
+subplot(2,1,2)
+imhistFB(inpict,n);
+
+%% a little more emphasis on where imhist() aligns things wrong
+ccc
+
+% some inputs
+inpict = rand(500);
+n = 5;
+
+% imhist can either give outputs or plot.  
+% it can't do both, so we have to call it twice.
+imhist(inpict,n); hold on
+[counts centers] = imhist(inpict,n);
+
+% find the axes since it won't give them to us
+hax = findobj(get(gcf,'children'),'type','axes');
+
+% figure out the bin edges from the centers, 
+% since it won't give us edges either
+dx = diff(centers(1:2));
+xr = [centers(1)-dx/2 centers(end)+dx/2];
+yr = ylim(hax(2));
+
+% create two images: 
+% top is a smooth sweep from black to white.
+% bottom corresponds to the center of each histogram bin.
+% the two images should periodically match at each bin center.
+smoothramp = repmat(linspace(xr(1),xr(2),100),[1 1 3]);
+binramp = repmat(centers.',[1 1 3]);
+binramp = imresize(binramp,[1 size(smoothramp,2)],'nearest');
+
+% concatenate the two stripe images
+% clamp as necessary for legacy versions
+compramp = min(max([binramp; smoothramp],0),1);
+
+% put the composite image behind the stem plot
+hi = image(xr,yr,compramp,'parent',hax(2));
+uistack(hi,'bottom')
+
+% find the stem plot and make it fat so it's easier to see
+hst = findobj(hax(2),'type','stem');
+set(hst,'linewidth',3)
+
+% draw a solid gray circle above each stem, 
+% such that the circle color is taken directly from the stem position
+for k = 1:n
+	hp = plot(hax(2),centers(k),yr(2)*0.67,'.');
+	set(hp,'color',[1 1 1]*centers(k));
+	set(hp,'markersize',60);
+end
+
+%% demonstrate plot styles
 clc; clf; clearvars
 
-%% 
+inpict = imread('cameraman.tif');
+n = 32;
+
+subplot(3,1,1)
+imhistFB(inpict,n,'style','stem'); % imhist()-style
+
+subplot(3,1,2)
+imhistFB(inpict,n,'style','bar');
+
+subplot(3,1,3)
+imhistFB(inpict,n,'style','patch');
+
+%% demonstrate bin alignment
 clc; clf; clearvars
+
+inpict = rand(500);
+n = 5;
+
+subplot(2,1,1)
+imhistFB(inpict,n,'style','bar','binalignment','center'); % imhist()-style
+
+subplot(2,1,2)
+imhistFB(inpict,n,'style','bar','binalignment','edge');
+
+%% demonstrate yscale styles
+clc; clf; clearvars
+
+inpict = imread('cameraman.tif');
+n = 256;
+
+subplot(2,1,1)
+imhistFB(inpict,n,'yscale','tight'); % imhist()-style
+
+subplot(2,1,2)
+imhistFB(inpict,n,'yscale','full');
+
+%% imhistFB() was never meant to support indexed-color images,
+% but it still can do a better job than imhist() can.
+clc; clf; clearvars
+
+% this is a uint8 indexed-color image with 11 colored 
+% blobs on a black background (12 colors)
+[Xuint CT] = imread('sources/blobs/indexedblobs.png');
+
+% this is a float-class copy of the same image
+% offset by one, as is convention.
+Xfloat = double(Xuint)+1;
+
+% EXAMPLE 1: imhist()
+% due to a bug, imhist() does not actually handle 
+% integer-class indexed images correctly, so it needs to be float.
+% while colorbar and histogram bins were misaligned for scaled images,
+% they will be aligned for no apparent reason if a colortable is provided.
+% the end bins appear as half-width as expected.
+subplot(4,2,1)
+imhist(Xuint,CT) % uint-class (wrong colorbar)
+subplot(4,2,2)
+imhist(Xfloat,CT) % float-class
+
+% EXAMPLE 2: imhistFB() with 'center' alignment
+% use the 'colortable' parameter to display an integer-class indexed image
+% obviously, the only thing you'd need to do for a properly-offset 
+% float-class indexed image is to shift 'range' by 1
+subplot(4,2,3)
+nct = size(CT,1);
+imhistFB(Xuint,nct,'colortable',CT,'range',[0 nct-1]) % uint-class
+subplot(4,2,4)
+imhistFB(Xfloat,nct,'colortable',CT,'range',[1 nct]) % float-class
+
+% EXAMPLE 3: imhistFB() with 'edge' alignment
+% do the same thing, but use 'edge' alignment so that
+% the colorbar segments all appear with uniform width.
+subplot(4,2,5)
+imhistFB(Xuint,nct,'colortable',CT,'range',[0 nct]-0.5,'binalignment','edge') % uint-class
+subplot(4,2,6)
+imhistFB(Xfloat,nct,'colortable',CT,'range',[0 nct]+0.5,'binalignment','edge') % float-class
+
+% EXAMPLE 4: imhistFB() with 'center' alignment and setting xlim
+% example 3 could also have been done with the same inputs as example 2
+% and subsequent manipulation of the x-limits of both axes.
+% this is what would need to be done for IPT imhist(),
+% though remember that imhist()'s axes don't have linked xticks.
+subplot(4,2,7)
+imhistFB(Xuint,nct,'colortable',CT,'range',[0 nct-1]) % uint-class
+subplot(4,2,8)
+imhistFB(Xfloat,nct,'colortable',CT,'range',[1 nct]) % float-class
+hax = findobj(gcf,'type','axes');
+set(hax(4),'xlim',[0 nct]-0.5) % uint
+set(hax(2),'xlim',[0 nct]+0.5) % float
+
+% make sure we're seeing all the integer-value ticks for this short CT
+% note that here and in example 4, i'm only updating the histogram axes
+% imhistFB() axes (both the stripe and histogram) are linked on 'xlim' and 'xtick'
+set(hax(4:4:12),'xtick',0:nct-1) % for any example using uint
+set(hax(2:4:12),'xtick',1:nct) % for any example using float
+
+% the imhist() axes are only linked on 'xlim', but not 'xtick', 
+% so we need to update both axes explicitly
+set(hax(15:16),'xtick',0:nct-1) % for any example using uint
+set(hax(13:14),'xtick',1:nct) % for any example using float
+
+% set up some labels
+title('uint-class','parent',hax(16))
+title('float-class','parent',hax(14))
+ylabel('Example 1','parent',hax(16),'fontweight','bold')
+ylabel('Example 2','parent',hax(12),'fontweight','bold')
+ylabel('Example 3','parent',hax(8),'fontweight','bold')
+ylabel('Example 4','parent',hax(4),'fontweight','bold')
+
+%% cshist() demo
+clc; clf; clearvars
+
+%inpict = rand(500,500,3);
+inpict = imread('peppers.png');
+
+spc = 'lab';
+style = 'bar';
+extents = 'box';
+yscale = 'tight'; 
+nbins = 256;
+
+counts = cshist(inpict,spc,'style',style, ...
+			'extents',extents, ...
+			'yscale',yscale, ...
+			'nbins',nbins);
 
 %% 
 clc; clf; clearvars

@@ -65,7 +65,7 @@ if isa(se,'strel')
 	se = se.getnhood();
 end
 
-if ~isimageclass(se) || ndims(se) > 2
+if ~isimageclass(se,'mimt') || ndims(se) > 2
 	error('MORPHOPS: Expected SE to be either a 2D numeric or logical array or a strel object.  Fallback methods do not support 3D structuring elements.')
 end
 
