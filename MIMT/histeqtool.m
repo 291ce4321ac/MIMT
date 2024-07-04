@@ -9,20 +9,26 @@ function [outpict T] = histeqtool(inpict,mode,varargin)
 %
 %  INPICT is an I/IA/RGB/RGBA/RGBAAA image of any standard image class
 %    Multiframe images are supported.  Alpha content is passed unmodified.
-%    Modes which operate on hue or saturation conceptually require color information
-%    and will throw an error if fed an I/IA image. 
 %
 %  MODE specifies how color images are handled:
 %    Modes which use histeqFB():
 %      'histeqrgb' operates on I/RGB channels independently
+%      'histeqhsv' operates on V in HSV
+%      'histeqhsl' operates on L in HSL
 %      'histeqlchab' operates on L in CIE LCHab
 %      'histeqh' operates on H in CIE LCHab
 %      'histeqs' operates on S in HuSLab
 %    Modes which use adapthisteqFB():
 %      'ahisteqrgb' operates on I/RGB channels independently
+%      'ahisteqhsv' operates on V in HSV
+%      'ahisteqhsl' operates on L in HSL
 %      'ahisteqlchab' operates on L in CIE LCHab
 %      'ahisteqh' operates on H in CIE LCHab
 %      'ahisteqs' operates on S in HuSLab
+%    For I/IA inputs, requesting HSV/HSL/LCH modes is the same as requesting I/RGB mode.
+%    Modes which operate on H/S alone conceptually require color information
+%    and will leave the input unchanged if fed an I/IA image. Modes which operate on
+%    H alone are blind to the distribution of H, and may produce discontinuities.
 %
 %  TRUNCOPT optionally specifies the truncation behavior used in LCH modes.  
 %    Supported modes are 'notruncate','truncatergb','truncatelch','truncatelchcalc'.
@@ -42,8 +48,8 @@ function [outpict T] = histeqtool(inpict,mode,varargin)
 %
 %  See also: imlnc(), histeqFB(), adapthisteqFB()
 
-modestrings = {'histeqrgb','histeqlchab','histeqh','histeqs',...
-			'ahisteqlchab','ahisteqh','ahisteqs','ahisteqrgb'};
+modestrings = {'histeqrgb','histeqhsv','histeqhsl','histeqlchab','histeqh','histeqs',...
+			'ahisteqrgb','ahisteqhsv','ahisteqhsl','ahisteqlchab','ahisteqh','ahisteqs'};
 if ~strismember(mode,modestrings)
 	error('HISTEQTOOL: unsupported mode %s',lower(mode))
 end
@@ -61,15 +67,20 @@ end
 [inpict alpha] = splitalpha(inpict);
 sz = imsize(inpict);
 
-% single-channel inputs simplify
+% single-channel inputs simplify based on implied intent
+[sz(3),~] = chancount(inpict);
 if sz(3) == 1 
 	switch lower(mode)
-		case 'histeqlchab'
+		case {'histeqhsv','histeqhsl','histeqlchab'}
+			% we weren't targeting color content anyway
 			mode = 'histeqrgb';
-		case 'ahisteqlchab'
+		case {'ahisteqhsv','ahisteqhsl','ahisteqlchab'}
+			% we weren't targeting color content anyway
 			mode = 'ahisteqrgb';
 		case {'histeqh','histeqs','ahisteqh','ahisteqs'}
-			error('HISTEQTOOL: the %s mode requires image to be RGB',lower(mode))
+			% if there's no color content, then there's nothing to be done.
+			outpict = joinalpha(inpict,alpha);
+			return
 	end
 end
 
@@ -77,12 +88,13 @@ end
 switch lower(mode)
 	case 'histeqrgb'
 		T = cell(sz(4),sz(3));
-	case {'histeqlchab','histeqh','histeqs'}
+	case {'histeqhsv','histeqhsl','histeqlchab','histeqh','histeqs'}
 		T = cell(sz(4),1);
 	otherwise
 		T = {};
 end
 
+% do the things
 outpict = zeros(sz);
 for f = 1:sz(4)
 	protoimage = inpict(:,:,:,f);
@@ -93,6 +105,18 @@ for f = 1:sz(4)
 			for c = 1:sz(3)
 				[protoimage(:,:,c) T{f,c}] = histeqFB(protoimage(:,:,c),varargin{:});
 			end
+			
+		case 'histeqhsv'
+			inpicthsx = rgb2hsv(protoimage);
+			[adjustedL T{f}] = histeqFB(inpicthsx(:,:,3),varargin{:});
+			protoimage = cat(3,inpicthsx(:,:,1:2),adjustedL);
+			protoimage = hsv2rgb(protoimage);
+			
+		case 'histeqhsl'
+			inpicthsx = rgb2hsl(protoimage);
+			[adjustedL T{f}] = histeqFB(inpicthsx(:,:,3),varargin{:});
+			protoimage = cat(3,inpicthsx(:,:,1:2),adjustedL);
+			protoimage = hsl2rgb(protoimage);
 			
 		case 'histeqlchab'
 			inpictlch = rgb2lch(protoimage,'lab');
@@ -117,6 +141,18 @@ for f = 1:sz(4)
 			for c = 1:sz(3)
 				protoimage(:,:,c) = adapthisteqFB(protoimage(:,:,c),varargin{:});
 			end
+			
+		case 'ahisteqhsv'
+			inpicthsx = rgb2hsv(protoimage);
+			adjustedL = adapthisteqFB(inpicthsx(:,:,3),varargin{:});
+			protoimage = cat(3,inpicthsx(:,:,1:2),adjustedL);
+			protoimage = hsv2rgb(protoimage);
+			
+		case 'ahisteqhsl'
+			inpicthsx = rgb2hsl(protoimage);
+			adjustedL = adapthisteqFB(inpicthsx(:,:,3),varargin{:});
+			protoimage = cat(3,inpicthsx(:,:,1:2),adjustedL);
+			protoimage = hsl2rgb(protoimage);
 			
 		case 'ahisteqlchab'
 			inpictlch = rgb2lch(protoimage,'lab');
@@ -144,6 +180,7 @@ for f = 1:sz(4)
 	outpict(:,:,:,f) = protoimage;
 end
 
+% put it all back together
 outpict = joinalpha(outpict,alpha);
 outpict = imcast(outpict,inclass);
 

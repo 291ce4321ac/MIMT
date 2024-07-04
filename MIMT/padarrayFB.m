@@ -104,7 +104,7 @@ end
 idx = repmat({':'},[1 numel(s)]);
 switch method
 	case 'value'
-		outpict = zeros(s+sum(padsize,1),inclass);
+		outpict = imzeros(s+sum(padsize,1),inclass);
 		outpict = outpict+imcast(padval,inclass);
 		pd = find(sum(padsize,1) ~= 0);
 		for k = 1:numel(pd)

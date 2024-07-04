@@ -50,8 +50,9 @@ stretchlimFB	uses/replaces stretchlim
 Other tools don't passthrough to their IPT counterparts, but may fill the same role 
 depending on your needs. For example:
 
-imhistFB		see imhist (this no longer does IPT passthrough)
+imhistFB		see imhist (fully supercedes IPT imhist; longer does IPT passthrough)
 cshist			see imhist
+simnorm			see mat2gray
 edgemap			see imgradient, edge
 replacepixels	see imoverlay
 uniquant		see gray2ind
@@ -77,6 +78,7 @@ and other color space conversion tools
 Bear in mind that this passthrough-fallback approach to resolving IPT availability has complications.
 Currently, MIMT is being slowly changed to support a broader set of numeric classes for image data,
 but many IPT/MATLAB tools will not correctly handle things which are otherwise supported during fallback.
+
 In other words, when a function synopsis says "$ARGUMENT is an array of any standard image class",
 the set of supported classes may depend on whether you have IPT, and violating what's expected
 may result in an error, or it may just silently give you a garbage result.  
@@ -86,6 +88,7 @@ Further concerns exist for uint64/int64 images.  See the imcast() synopsis for m
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Some files may still require other resources:
 
+wpread/wpwrite require the cwebp and dwebp utilities from Google
 picdynamics requires LTI simulation tools which may be found in various toolboxes
 gifread/gifwrite requires imagemagick for certain options
 imrectify needs R2013b or newer in order to use the table class (only when using 'showgui',false)

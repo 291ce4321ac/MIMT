@@ -23,7 +23,6 @@ function inbucket = mimread(pathexp,varargin)
 %
 % OPTIONS are keys including:
 %    VERBOSE will cause the list of file paths and other image information to be dumped to console.
-%
 %    QUIET will suppress any non-terminal warnings when invalid images are encountered.
 %
 % EXAMPLE:
@@ -34,17 +33,22 @@ function inbucket = mimread(pathexp,varargin)
 %                  'bicubic','outclass','uint8','padding',[0.2 0 0.5 0.8],'verbose');
 %
 % NOTES:
+%    Supported formats include WEBP, and those supported by IMREAD
+% 
 %    Indexed image output is not supported.  Any indexed images encountered will be converted.
 %
-%    Multiframe import is supported for GIF, TIFF, and CUR/ICO files.
+%    Multiframe import is supported for GIF, TIFF, and CUR/ICO files. Multiframe APNG and WEBP
+%    are not supported.
 %
-%    GIF file import uses GIFREAD for multiple reasons.  Certain GIF files with transparency 
-%    and specified frame disposal methods will not be read by IMREAD as expected.  In these 
-%    cases, correct import relies on optional functionality of GIFREAD which uses ImageMagick and 
-%    shared memory, and will not work on Windows systems or if ImageMagick is not installed.  
-%    MIMREAD will attempt this method before falling back to the more limited native abilities 
-%    of IMREAD.  Keep this in mind if you encounter filled regions where transparency should be.
-%    See 'help gifread'
+%    GIF file import uses GIFREAD.  WEBP file import uses WPREAD.  See the help for these tools
+%    for more info on their capabilites, limitations, and requirements.
+%
+%    JPG file import uses IMREADORT, so the image(s) should be returned properly oriented as 
+%    dictated by their EXIF orientation information.  
+% 
+%    While MIMREAD supports CUR/ICO files, importing is limited by the abilities of IMREAD.  
+%    Files containing any compressed (PNG) frames will be skipped.
+%    Individual frames with geometry >256px will be skipped.
 %
 %    If using this tool to import imagesets exported by GIMP (via Export Layers), keep in mind that
 %    the output images inherit the geometry of their respective layer, not the source image itself.  
@@ -52,12 +56,8 @@ function inbucket = mimread(pathexp,varargin)
 %    the layer offsets will be gone.  Either make sure all layers match the image size before 
 %    exporting (Layer to Image Size) or find some method to retain offset information.
 %
-%    While MIMREAD supports CUR/ICO files, importing is limited by the abilities of IMREAD.  
-%    Files containing any compressed (PNG) frames will be skipped.
-%    Individual frames with geometry >256px will be skipped.
-%
 % Webdocs: http://mimtdocs.rf.gd/manual/html/mimread.html
-% See also: imstacker, batchloader, imread, gifread, imfinfo 
+% See also: imstacker, batchloader, imread, gifread, imfinfo, imreadort, wpread
 
 
 verbosity = 'normal';
@@ -89,7 +89,6 @@ end
 
 
 % PROCESS PATH EXPRESSION(S) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 if ~isempty(pathsuffix)
 	pathprefix = pathexp;
 	pathexp = cell([numel(pathsuffix) 1]);
@@ -119,7 +118,6 @@ end
 
 
 % READ FILES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 numpicts = size(imagepaths,1);
 inbucket = cell(numpicts,1);
 sizetable = ones(numpicts,4);
@@ -130,10 +128,47 @@ nvp = 0; % num valid picts
 nvf = 0; % num valid files
 
 for p = 1:numpicts
+	% declare some assumed values
+	thispict = [];
+	thisalpha = [];
+	thismap = []; 
 	pictisvalid = 1; % assume pict is valid
-	thisfile = imagepaths{p};
-		
-	if strcmpi(thisfile(end-2:end),'gif')		
+	
+	thisfile = imagepaths{p};	
+	switch lower(thisfile(end-3:end))
+		case '.gif'
+			handlegif();
+		case {'.tif','tiff','.cur','.ico'}
+			handletiff();
+		case {'.jpg','jpeg'}
+			handlejpg();
+		case 'webp'
+			handlewebp();
+		otherwise
+			handleother();
+	end
+end
+
+% need to truncate arrays and adjust numpicts after loop
+if nvp == 0
+	error('MIMREAD: no valid image files found')
+elseif nvp ~= numpicts
+	numpicts = nvp;
+	inbucket = inbucket(1:nvp);
+	sizetable = sizetable(1:nvp,:);
+end
+
+if strcmp(verbosity,'verbose')
+	fprintf('\nNUMBER OF VALID FILES: %d\n',nvf)
+	fprintf('\nINPUT SIZE TABLE:\n')
+	sizetable
+	fprintf('\nNUMBER OF VALID IMAGES: %d\n',numpicts)
+end
+
+
+
+% SUPPORT FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	function handlegif()
 		try
 			thispict = gifread(thisfile,'imagemagick');
 		catch
@@ -156,7 +191,10 @@ for p = 1:numpicts
 			nvf = nvf+1;
 			addtobucket();
 		end
-	elseif ismember(lower(thisfile(end-3:end)),{'.tif','tiff','.cur','.ico'}) 
+	end
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	function handletiff()
 		% for multiframe TIFF/CUR/ICO files, each frame needs a seperate call to IMREAD
 		% geometry/depth/chans may vary between frames
 		try
@@ -191,8 +229,10 @@ for p = 1:numpicts
 				end
 			end
 		end
-		
-	elseif ismember(lower(thisfile(end-3:end)),{'.jpg','jpeg'}) 
+	end
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	function handlejpg()
 		try
 			[thispict thismap thisalpha] = imreadort(thisfile);
 		catch
@@ -207,8 +247,34 @@ for p = 1:numpicts
 			nvf = nvf+1;
 			addtobucket();
 		end
+	end
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	function handlewebp()
+		try
+			thispict = wpread(thisfile);
+		catch
+			pictisvalid = 0;
+			if ~strcmp(verbosity,'quiet')
+				fprintf('MIMREAD: %s does not appear to be a valid image\n',imagepaths{p})
+			end
+		end
 		
-	else
+		
+		
+		if pictisvalid
+			% WPREAD already handled this
+			thisalpha = [];
+			thismap = []; 
+			
+			nvp = nvp+1;
+			nvf = nvf+1;
+			addtobucket();
+		end
+	end
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	function handleother()
 		try
 			[thispict thismap thisalpha] = imread(thisfile);
 		catch
@@ -225,29 +291,7 @@ for p = 1:numpicts
 		end
 	end
 
-end
-clear imagenames pathexp pathinfo pathprefix pathsuffix thisfile thismap thisalpha thispict thisval thiskey alphaclass
-
-% need to truncate arrays and adjust numpicts after loop
-if nvp == 0
-	error('MIMREAD: no valid image files found')
-elseif nvp ~= numpicts
-	numpicts = nvp;
-	inbucket = inbucket(1:nvp);
-	sizetable = sizetable(1:nvp,:);
-end
-
-if strcmp(verbosity,'verbose')
-	fprintf('\nNUMBER OF VALID FILES: %d\n',nvf)
-	fprintf('\nINPUT SIZE TABLE:\n')
-	sizetable
-	fprintf('\nNUMBER OF VALID IMAGES: %d\n',numpicts)
-end
-
-clear thispict thisframe
-
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 	function addtobucket()
 		% convert image from indexed and assemble alpha if valid
 		if ~isempty(thismap)
@@ -258,20 +302,11 @@ clear thispict thisframe
 		if ~isempty(thisalpha)
 			alphaclass = class(thisalpha);
 			pictclass = class(thispict);
-			switch alphaclass
-				case 'logical'
-					wl = 1;
-				case 'uint8'
-					wl = 255;
-				case 'uint16'
-					wl = 65535;
-				otherwise
-					% this shouldn't be possible
-			end
 			
 			% don't bother if alpha is 100%
+			acrange = imclassrange(alphaclass);
 			[mn mx] = imrange(thisalpha);
-			if ~(mx == mn && mx == wl)
+			if ~(mx == mn && mx == acrange(2))
 				thispict = cat(3,thispict,imcast(thisalpha,pictclass));
 			end	
 		end
@@ -282,7 +317,7 @@ clear thispict thisframe
 		sizetable(nvp,:) = [size(inbucket{nvp},1) size(inbucket{nvp},2) size(inbucket{nvp},3) size(inbucket{nvp},4)];
 	end
 
-end
+end % END MAIN SCOPE
 
 
 

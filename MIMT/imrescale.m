@@ -14,8 +14,8 @@ function outpict = imrescale(inpict,ca,cb)
 %  INRANGE and OUTRANGE specify the nominal input and output range of the data.
 %     Either may be a 2-element vector explicitly specifying a range, or either 
 %     may be a class name implicitly specifying the nominal range associated with
-%     a particular numeric class.  Supported class names are those supported
-%     by imclassrange().
+%     a particular numeric class.  Supported names are those supported by 
+%     imclassrange(), including non-native integer scales.
 %     When unspecified, INRANGE is implied by the class of INPICT.
 %     When unspecified, OUTRANGE is implied by the class of OUTPICT (i.e. [0 1])
 %
@@ -29,7 +29,7 @@ function outpict = imrescale(inpict,ca,cb)
 %
 %  Output class is 'double'
 %
-%  See also: imcast, simnorm
+%  See also: imcast, imclassrange, simnorm
 	
 switch nargin
 	case 1

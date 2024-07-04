@@ -116,7 +116,7 @@ function complogical()
 	end
 	
 	% assignment by logical indexing with implicit expansion on dims 3 and 4
-	outpict = zeros(outsize,outclass);
+	outpict = imzeros(outsize,outclass);
 	for f = 1:outsize(4)
 		% handle dim 3,4 expansion by selective indexing instead of replication
 		fmk = min(f,szmk(4));

@@ -66,9 +66,11 @@ function varargout = imhistFB(inpict,varargin)
 % make the 'centerbins' functionality control both the histogram and stripe breakpoints
 % that way they _always_ correspond.
 
-% we don't need indexed image support, and imhistFB() doesn't need to be optimally fast.
-% well, speed _would_ be nice since it's used for histeq tools -- but only when they're in fallback
-% so the speed difference is entirely moot.
+% https://www.mathworks.com/matlabcentral/answers/2120156-why-does-imhist-do-this
+
+% this isn't a perfect replica of imhist()'s binning behavior.  
+% the lower end bin isn't open in the same way (at least not with histcounts().  idk about histc())
+% i don't know that i care to fix that.
 
 % PARAMETERS
 stylestr = {'bar','stem','patch'};
@@ -258,6 +260,8 @@ function ploteverything()
 		case 'tight'
 			yrange = [0 2.5*sqrt(counts.'*counts/numel(counts))];
 	end
+	
+	% imhist() will have negative ylim if this happens
 	if sum(counts(:)) == 0
 		yrange = [0 1];
 	end
@@ -271,13 +275,16 @@ function ploteverything()
 		case 'patch'
 			drawpatchstyle()
 	end
+	
+	% use a grid to separate us from the animals :)
+	% i might make this optional, but the axes handles are available
 	grid(plotax,'on');
 	
 	% set x-y axis scaling
 	xlim(plotax,xrange);
 	ylim(plotax,yrange);
 	
-	% imhist also adds a colorbar
+	% imhist() also adds a colorbar
 	% modify the axes used for the stem plot
 	stripeh = 0.075; % same as imhist()
 	set(plotax,'units','normalized');
@@ -359,7 +366,7 @@ function drawpatchstyle()
 end
 
 function link_and_prepare_axes()
-	% link xlim property
+	% link xlim/xtick properties
 	h_link = linkprop([plotax,stripeax],{'xlim','xtick'});
 	setappdata(stripeax,'stripe_link',h_link);
 

@@ -798,7 +798,35 @@
 % ADDED 
 % cshist() colorspace histogramming tool
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1.56 update
 
+% FIXED
+% needed to use imzeros()/imones() in order to maintain 
+% full class support in older versions:
+%   replacepixels(), rbdetile(), padarrayFB(), imstacker()
+
+% IMPROVED 
+% non-native integer scale support added to imclassrange()
+% imcast():
+%   non-native integer scales supported in explicit mode
+%   wide integer conversions changed to match rounding behavior of IPT tools
+% mimread():
+%   significant edits for clarity and simplification
+%   added WEBP support
+% histeqtool():
+%   added pointless HSV/HSL modes
+%   changed H/S mode behavior for I/IA inputs
+% removed some dependencies from intervalct()
+
+% ADDED 
+% combonnintconv() (private)
+% parseintclassname() (private)
+% buildintclassname() (private)
+% findintcontainerwidth() (private)
+% intervalct()
+% wpread()
+% wpwrite()
 
 
 

@@ -22,11 +22,11 @@ function y = sgamma(x,g,n)
 %
 % this is equivalent to a simple composition of power functions 
 % adhering to the order of operations applied by imlnc().
-% i.e. rgamma(pgamma(x,g),rg) where g < 1, g = rg
+% i.e. rgamma(pgamma(x,g),rg) where g < 1, g = rg,
 % and both g,rg are closer to unity than sg
-% as an obvious consequence of their compounded influence,
+% (as an obvious consequence of their compounded influence),
 % and P is closer to unity than sg
-% as dictated by the approximate area correction function in adjgamma().
+% (as dictated by the approximate area correction function in adjgamma()).
 
 % prior to ~R2015b, interp1() is significantly slower.
 % i believe this change occurred in R2015a, based on RN

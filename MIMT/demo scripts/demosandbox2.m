@@ -1492,6 +1492,341 @@ counts = cshist(inpict,spc,'style',style, ...
 			'yscale',yscale, ...
 			'nbins',nbins);
 
+%% imcast() demos
+clc; clf; clearvars
+
+% the inputs
+outclass = 'single';
+inpict = imread('sources/std/circuit.tif.png'); % any class
+
+% the problem with IPT tools is that the output class parameter
+% is embedded in the function name like some sort of eval-bait
+% so you have to do dumb shit like this if you want flexibility.
+% this also only supports the six classes supported in IPT.
+switch outclass
+	case 'uint8'
+		outpict = im2uint8(inpict);
+	case 'double'
+		outpict = im2double(inpict);
+	case 'single'
+		outpict = im2single(inpict);
+	case 'uint16'
+		outpict = im2uint16(inpict);
+	case 'int16'
+		outpict = im2int16(inpict);	
+	case 'logical'
+		% this is the behavior convention asserted in imcast()
+		outpict = im2double(inpict) >= 0.5;
+end
+
+% just do it with MIMT imcast().
+% this supports any regular numeric class.
+op0 = imcast(inpict,outclass);
+
+% they're the same
+isequal(outpict,op0)
+
+%% the rebuttal
+clc; clf; clearvars
+% one rebuttal is that we really don't need parametric conversions
+% for a class-agnostic workflow (e.g. implementing class inheritance) 
+% if we simply do blind recasting to float and we work with improperly-
+% scaled float data.  besides, everything would be so much simpler and 
+% faster if we avoid rescaling, right?
+
+% the input
+inpict = imread('sources/std/circuit.tif.png'); % any class
+
+% convert to float and do something in variable-scale float
+workingcopy = double(inpict);
+workingcopy = workingcopy*0.70 + 0.15; % notice why this is wrong?
+
+% complete the process by returning to the original class
+outpict = cast(workingcopy,class(inpict));
+
+% see why that doesn't work?  obviously this just shifts the problem from 
+% the periphery of the process to the entire internal core of the code.
+% we're only addressing the class, but not the data scale.  our main working 
+% image does not have a consistent scale, so we need to change all of those 
+% operations to be scale-agnostic.  we're making the design _less_ modular.
+%
+% there's no justification for promoting that as a general solution to this 
+% sort of problem.  instead of trying to make all our code dynamically adapt 
+% to the variable scale, it would clearly make more sense to simply rescale 
+% the float copy to a consistent scale. if that working scale is unit-scale, 
+% then there's no point avoiding im2double(). either way, we'd still need to 
+% dynamically rescale again on the way out.
+% 
+% in effect, that would be reimplementing the core of imcast()'s fallback code -- 
+% but only for a single case, and we would be proposing to reinvent this 
+% wheel repeatedly every time it's needed ... 
+
+%% so just use rescale().  it's concise!
+clc; clf; clearvars
+% ... oh, but it shouldn't be that big a deal!  you could get the ranges 
+% from getrangefromclass() and throw that in rescale() and it would work 
+% and it would still be all concise on one line!
+%
+% _no it wouldn't_.  given the maddening ugliness of rescale()'s syntax,
+% it couldn't generally be one-lined.  aside from mere ugliness, 
+% the correct transformation (for signed integer outputs) cannot be 
+% performed with a single call to rescale(). considering that complication
+% alone, there's no point even involving rescale().  if we're just writing 
+% the basic arithmetic every time, then this whole proposal is no convenience.
+% see imcast()'s internal notes.
+
+% consider trying to cast and scale from unit-scale float to int16:
+
+% inputs
+inpict = linspace(0,1,11); % a simple float input which will cause problems
+outclass = 'int16';
+
+% the reference
+ipict0 = im2int16(inpict); 
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from float to int16 using MIMT
+ipict1 = imcast(inpict,outclass); 
+
+% test
+immse(ipict0,ipict1) % they're identical
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% do the same thing, but insisting that it can simply
+% be done using rescale() and maybe getrangefromclass().
+% this will be spuriously off for certain inputs
+% if the output class is signed integer.
+% getrangefromclass() doesn't take a named class
+% but it does return a nice convenient tuple
+or = getrangefromclass(ones(1,1,outclass));
+% but rescale() can't even take tuples, and scale parameters
+% are formatted inconsistently and ordered backwards for extra ugliness.
+ipict2 = rescale(inpict,or(1),or(2),'inputmin',0,'inputmax',1); 
+% oh yeah, we still have to do this part.
+ipict2 = cast(ipict2,outclass);
+
+% test
+immse(ipict0,ipict2) % error for signed outputs
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% this is the stupid bullshit that you'd need to do
+% to stabilize that last 1LSB for signed output if you 
+% absolutely insist on using rescale().
+if outclass(1) == 'u' % assuming it's char
+	or = getrangefromclass(ones(1,1,outclass));
+	ipict3 = rescale(inpict,or(1),or(2),'inputmin',0,'inputmax',1);
+elseif outclass(1) == 'i'
+	or = getrangefromclass(ones(1,1,['u' outclass]));
+	ipict3 = rescale(inpict,or(1),or(2),'inputmin',0,'inputmax',1);
+	ipict3 = round(ipict3) - ceil(or(2)/2);
+else
+	% explode, i guess.
+end
+ipict3 = cast(ipict3,outclass);
+
+% test
+immse(ipict0,ipict3) % now they match
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% this is the degeneralized arithmetic for float to integer
+% it's inflexible and deoptimized, but we already know that.
+% still, it's no less flexible than using rescale(), 
+% and it's simpler, more portable, and it's significantly faster.
+% ... but why would you rewrite it repeatedly every time?
+or = getrangefromclass(ones(1,1,outclass));
+ipict4 = cast(round(inpict*diff(or)) + or(1),outclass);
+
+% test
+immse(ipict0,ipict4) % now they match
+
+% TL;DR:
+% integer-scale float workflows is a solution for people who think that "class agnostic" 
+% means "presume everything is uint8 and that operations are never scale-dependent".
+% its typical form involves sprinkling magic 255 literals everywhere.
+%
+% the solution is to rescale when recasting.  the tool to do that is imcast(),
+% not rescale().  i have my opinions about rescale(). they start with "ugh."
+
+%% demonstrate class inheritance using imcast()
+clc; clf; clearvars
+
+% convert an image without presuming its initial class
+inpict = imread('sources/std/circuit.tif.png'); % any class
+[workingcopy inclass] = imcast(inpict,'double'); % a known class
+
+% do a bunch of operations in unit-scale floating point
+workingcopy = workingcopy*0.70 + 0.15;
+
+% recast output to match original image class
+outpict = imcast(workingcopy,inclass);
+
+% inpict and outpict can be concatenated, 
+% since they will always have the same class
+imshow2([inpict outpict],'invert')
+
+%% explicit mode demo
+clc; clf; clearvars
+% note in all cases that the actual class 
+% of the input tuple ('double') is ignored
+
+% outpict will be [-524288 524287], class 'int32'
+A = imcast([0 1023],'uint10','int20')
+
+% outpict will be [0 4095], class 'uint16'
+B = imcast([0 255],'uint8','uint12')
+
+% outpict is the same. although the input is >>15, 
+% output is clamped to uint12-scale
+C = imcast([0 100],'uint4','uint12')
+
+% outpict will be [0 0 1 1], class 'logical'
+D = imcast([0 511 512 1023],'uint10','logical')
+
+%% explicit mode quant styles
+clc; clf; clearvars
+% Note that the significance of the difference between the two methods 
+% corresponds to the relative contribution of 1LSB in the output scale.
+
+% downshift to a narrow scale for clarity
+x = uint16(0:1023);
+inclass = 'uint10';
+outclass = 'uint4';
+
+% ideal linear transformation between interval endpoints
+ir = imclassrange(inclass);
+or = imclassrange(outclass);
+y0 = double(x)/(ir(2)/or(2));
+
+% the two available methods:
+% default IPT-style rescaling
+% Y = round(X/((2^bitsin - 1)/(2^bitsout - 1)))
+y1 = imcast(x,inclass,outclass);
+
+% used for 48bpp+ non-harmonic rescaling
+% Y = fix(X/2^(bitsin - bitsout))
+y2 = imcast(x,inclass,outclass,'bitshift');
+
+% compare the error between the integer approximations 
+% and an ideal linear transformation
+subplot(2,1,1)
+y = [y2;y1];
+labels = {'bitshift','default/auto'};
+plot(x,y); hold on; plot(x,y0)
+xlim(ir)
+legend('string',labels,'location','northwest')
+
+% the IPT method has a more uniformly distributed error, 
+% with a smaller peak magnitude
+subplot(2,1,2)
+plot(x,bsxfun(@minus,double(y0),double(y)))
+xlim(ir)
+legend('string',labels)
+
+%% a two-step non-harmonic downconversion workaround
+clc; clf; clearvars
+% In the absurdly unlikely case of a non-harmonic downconversion from 48bpp+
+% to something narrower than 48bpp, consider the following two-step approximation 
+% of the IPT-style conversion.  
+%
+% This sort of approach may be favorable compared to using an intermediate
+% float conversion if both input and output classes are significantly wide.
+% In either case, we can expect some rounding/aliasing, but in the float
+% case, those imperfections will be distributed asymmetrically.
+%
+% In lieu of a 128b-equivalent wide arithmetic implementation, this
+% may suffice to bridge the gaps I left in imcast()'s capabilities.
+
+% a non-harmonic downconversion above 48b
+% downshift to a narrow scale for clarity
+x = linspace(0,1,1E6); % we can't afford a full ramp anyway
+inclass = 'uint56'; % who would actually do this??
+outclass = 'uint5'; % whyyy?
+
+% ideal linear transformation between interval endpoints
+x = imcast(x,'double',inclass); % stretch our fake data
+ir = imclassrange(inclass);
+or = imclassrange(outclass);
+y0 = double(x)/(ir(2)/or(2));
+
+% the default mode is bypassed in this case
+y1 = imcast(x,inclass,outclass); % bypasses to 'bitshift' mode
+y2 = imcast(x,inclass,outclass,'bitshift'); % also 'bitshift' mode
+
+% approximate the IPT-style conversion in a 2-step process
+% 1: bitshift to something safely within float precision
+% 2: do arithmetic downconversion from there
+[~,issi,~] = parseintclassname(inclass);
+tempclass = buildintclassname(issi,48);
+y3 = imcast(x,inclass,tempclass); % non-harmonic bitwise downscale
+y3 = imcast(y3,tempclass,outclass); % IPT-style arithmetic downscale
+
+% the peak contrast error is reduced at the cost
+% of some extra aliasing
+y = [y2;y1;y3];
+labels = {'bitshift','default/auto','two step'};
+plot(x,bsxfun(@minus,double(y0),double(y)))
+xlim(ir)
+legend('string',labels)
+
+%% intervalct() demo
+clc; clf; clearvars
+% see also:
+% https://www.mathworks.com/matlabcentral/answers/1891415-change-the-range-of-your-sections-in-your-colormap#answer_1148215
+% https://www.mathworks.com/matlabcentral/answers/826660-unequal-custom-non-evenly-spaced-colorbar-intervals#answer_1464616
+% https://www.mathworks.com/matlabcentral/answers/2033754-how-to-change-the-scale-of-color-bar-to-discrete#comment_2929291
+
+% fake unit-scale data
+[X Y] = meshgrid(linspace(0,0.5,500));
+Z = X + Y;
+
+% arbitrarily-spaced breakpoints
+lvl = [0 0.1 0.2 0.25 exp(-1) 0.4 0.5 2/3 1/sqrt(2) 0.82 1];
+
+% interval/category colors
+CT0 = ccmap('althi',numel(lvl)-1);
+
+% generate expanded color table & info
+nmax = 1000; % let this be long
+[CT cidx] = intervalct(lvl,CT0,nmax);
+
+% plot everything
+contourf(X,Y,Z,lvl)
+
+% add colorbar with matching ticks
+colormap(CT);
+cb = colorbar;
+cb.Ticks = lvl;
+caxis(imrange(lvl));
+
+%% wpread()/wpwrite() demo
+clc; clf; clearvars
+
+% get an image in the workspace
+[inpict,~,alpha] = imread('sources/bluebars.png');
+inpict = joinalpha(inpict,alpha); % RGBA
+
+% write the image to a lossless WEBP
+fname = 'test.webp';
+wpwrite(inpict,fname)
+
+% read the image back from disk
+recovered = wpread(fname);
+
+% do they match?
+isequal(inpict,recovered)
+
+% show it
+imshow2(recovered,'invert')
+
+%% 
+clc; clf; clearvars
+
+%% 
+clc; clf; clearvars
+
+%% 
+clc; clf; clearvars
+
 %% 
 clc; clf; clearvars
 

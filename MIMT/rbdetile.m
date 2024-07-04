@@ -46,7 +46,7 @@ xos = randi([0 sz(2)-bs(2)],nblocks,1);
 yos = randi([0 sz(1)-bs(1)],nblocks,1);
 
 % extract blocks
-outpict = zeros([bs size(inpict,3) nblocks],class(inpict));
+outpict = imzeros([bs size(inpict,3) nblocks],class(inpict));
 for f = 1:nblocks
 	outpict(:,:,:,f) = inpict(yos(f)+1:yos(f)+bs(1),xos(f)+1:xos(f)+bs(2),:);
 end

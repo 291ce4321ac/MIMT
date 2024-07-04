@@ -473,7 +473,7 @@ for p = 1:numpicts
 			end
 
 			if f == 1
-				thisframeresized = zeros([imsize(thisframe,3) thissize(4)],outclass);
+				thisframeresized = imzeros([imsize(thisframe,3) thissize(4)],outclass);
 			end
 			thisframeresized(:,:,:,f) = imcast(thisframe,outclass);
 		end
@@ -495,7 +495,7 @@ for p = 1:numpicts
 						thisframe = imresizeFB(thispict(:,:,:,f),[outsize(1) NaN],interpolation);
 				end
 				if f == 1	
-					thisframeresized = zeros([imsize(thisframe,3) thissize(4)],outclass);
+					thisframeresized = imzeros([imsize(thisframe,3) thissize(4)],outclass);
 				end
 				thisframeresized(:,:,:,f) = imcast(thisframe,outclass);
 			end
@@ -537,7 +537,7 @@ for p = 1:numpicts
 				end		
 			
 				if f == 1	
-					thisframeresized = zeros([imsize(thisframe,3) thissize(4)],outclass);
+					thisframeresized = imzeros([imsize(thisframe,3) thissize(4)],outclass);
 				end
 				thisframeresized(:,:,:,f) = imcast(thisframe,outclass);
 			end
@@ -579,7 +579,7 @@ for p = 1:numpicts
 				end
 				
 				if f == 1	
-					thisframeresized = zeros([imsize(thisframe,3) thissize(4)],outclass);
+					thisframeresized = imzeros([imsize(thisframe,3) thissize(4)],outclass);
 				end
 				thisframeresized(:,:,:,f) = imcast(thisframe,outclass);
 			end
@@ -602,7 +602,7 @@ if dim ~= 4 && sum(diff(sizetable(:,4))) ~= 0
 end
 
 % concatenate images
-outpict = zeros([outsize numoutchans numoutframes],outclass);
+outpict = imzeros([outsize numoutchans numoutframes],outclass);
 switch dim
 	case 4
 		for p = 1:numpicts

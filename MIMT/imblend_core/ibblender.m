@@ -647,7 +647,17 @@ switch modestring
 		end
 
 	case 'lighteny'
-		% soft mode does a faux-linear opacity blend as a compromise
+		% ps seems to do some sort of slight transition easing,
+		% but it's hard to tell because apparently nobody (including adobe)
+		% can figure out how to upload meaningful examples to the web.
+		% either the images are microscopic n-th generation JPGs, 
+		% or they're inconsistently cropped from screenshots by a jittery ape,
+		% or they're clearly subject to other unmentioned operations,
+		% or they're blended from inconsistent sources which are never revealed,
+		% or any combination thereof.
+		% 
+		% soft mode does a faux-linear opacity blend as a compromise.  
+		% i don't have ps, so take it or leave it.
 		amount = imclamp(amount);
 		factors = ctflop(gettfm('luma',rec));
 		My = sum(bsxfun(@times,M,factors),3);
